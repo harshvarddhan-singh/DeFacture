@@ -1,0 +1,70 @@
+/* 
+DeFacture - Custom Styles 
+This CSS file contains custom styling for the DeFacture application.
+*/
+
+/* Base styling - will be expanded later */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Background image and styling */
+.stApp {
+    background-image: url('https://images.pexels.com/photos/93405/pexels-photo-93405.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Glassmorphism styling for main content */
+section.main > div {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar styling */
+section[data-testid="stSidebar"] > div {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0 12px 12px 0;
+    padding: 1rem;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.07);
+}
+
+/* Card styling */
+.card {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Button styling */
+.stButton button {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* Animation for loading */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}

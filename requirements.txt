@@ -1,0 +1,14 @@
+# Basic requirements for the prototype
+streamlit==1.31.0
+requests==2.31.0
+python-dotenv==1.0.0
+langchain==0.3.27
+langchain-core==0.2.10
+# OpenAI removed
+# langchain-openai==0.1.1
+# openai==1.12.0
+
+# Hugging Face integration
+langchain-huggingface==0.0.2
+transformers==4.37.2
+sentence-transformers==2.2.2

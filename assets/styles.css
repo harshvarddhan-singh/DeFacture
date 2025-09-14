@@ -4,58 +4,115 @@ This CSS file contains custom styling for the DeFacture application.
 */
 
 /* Base styling - will be expanded later */
+
+
+
+
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%);
+    color: #1e293b; /* deep blue-gray for base text */
 }
 
 /* Background image and styling */
+
+
+
+
+
+
 .stApp {
-    background-image: url('https://images.pexels.com/photos/93405/pexels-photo-93405.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    min-height: 100vh;
+    background: url('https://images.pexels.com/photos/2249964/pexels-photo-2249964.jpeg') center center/cover no-repeat fixed;
+    position: relative;
+}
+
+
+
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(227, 240, 252, 0.25);
+    backdrop-filter: blur(1.5px);
+    z-index: 0;
+}
+
+section.main > div, section[data-testid="stSidebar"] > div {
+    position: relative;
+    z-index: 1;
 }
 
 /* Glassmorphism styling for main content */
+
+
+
 section.main > div {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 1.2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(180, 180, 200, 0.10);
+    border: 1px solid #e3e3e3;
 }
 
 /* Sidebar styling */
+
+
+
 section[data-testid="stSidebar"] > div {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0 12px 12px 0;
-    padding: 1rem;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.07);
+    background: rgba(243, 246, 250, 0.98);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-right: 2px solid #e3e3e3;
+    border-radius: 0 18px 18px 0;
+    padding: 1.5rem;
+    box-shadow: 2px 0 16px rgba(180, 180, 200, 0.10);
 }
 
 /* Card styling */
+
+
+
+
 .card {
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 10px;
+    background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%);
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease;
+    box-shadow: 0 4px 16px rgba(180, 180, 200, 0.10);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #e3e3e3;
+    color: #1e293b;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 8px 32px rgba(180, 180, 200, 0.18);
 }
 
 /* Button styling */
+
+
+
+
 .stButton button {
-    border-radius: 8px;
-    font-weight: 500;
+    border-radius: 12px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #e3f0fc 0%, #f8fafc 100%);
+    color: #2563eb; /* blue shade for buttons */
+    border: none;
+    box-shadow: 0 2px 8px rgba(180, 180, 200, 0.10);
+    transition: background 0.3s, color 0.3s;
+}
+
+.stButton button:hover {
+    background: linear-gradient(90deg, #f8fafc 0%, #e3f0fc 100%);
+    color: #0a2540; /* darker blue on hover */
 }
 
 /* Animation for loading */
@@ -65,6 +122,11 @@ section[data-testid="stSidebar"] > div {
     100% { opacity: 0.6; }
 }
 
+
+
+
+
 .loading {
     animation: pulse 1.5s infinite;
+    color: #2563eb;
 }

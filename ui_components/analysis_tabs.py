@@ -30,20 +30,48 @@ def render_analysis_tabs(article_data=None):
 
     # Summary tab
     with tab_summary:
-        st.subheader("Article Summary")
-        st.write("Summary content will appear here.")
-        
+        st.markdown(
+            """
+            <div class="card" style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: #6c63ff;">Article Summary</h3>
+                <span style="color: #ff6f91;">Summary content will appear here.</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Context Analysis tab
     with tab_context:
-        st.subheader("Context Analysis")
-        st.write("Context analysis will appear here.")
-        
+        st.markdown(
+            """
+            <div class="card" style="background: linear-gradient(120deg, #f8fafc 0%, #fceabb 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: #ff6f91;">Context Analysis</h3>
+                <span style="color: #6c63ff;">Context analysis will appear here.</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Related Articles tab
     with tab_related:
-        st.subheader("Related Articles")
-        st.write("Related articles will appear here.")
-        
+        st.markdown(
+            """
+            <div class="card" style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: #6c63ff;">Related Articles</h3>
+                <span style="color: #ff6f91;">Related articles will appear here.</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Fact Check tab
     with tab_factcheck:
-        st.subheader("Fact Check")
-        st.write("Fact checking results will appear here.")
+        st.markdown(
+            """
+            <div class="card" style="background: linear-gradient(120deg, #f8fafc 0%, #fceabb 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: #ff6f91;">Fact Check</h3>
+                <span style="color: #6c63ff;">Fact check results will appear here.</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )

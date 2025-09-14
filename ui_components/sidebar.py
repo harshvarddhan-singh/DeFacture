@@ -14,30 +14,47 @@ def render_sidebar():
     Renders the sidebar with navigation and controls
     """
     with st.sidebar:
-        st.title("DeFacture")
-        st.markdown("### News Analysis Tool")
-        
+
+        st.markdown(
+            """
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <img src='https://cdn.pixabay.com/photo/2015/10/31/12/00/financial-equalization-1015309_1280.jpg' width='48' style='border-radius: 12px; box-shadow: 0 2px 8px #e3f0fc; object-fit: cover;' />
+                <h2 style='background: linear-gradient(90deg, #4169e1 0%, #4682b4 100%); background-clip: text; -webkit-background-clip: text; color: transparent; font-size: 1.6rem; font-family: Inter, Segoe UI, sans-serif; margin-bottom: 0;'>DeFacture</h2>
+                <span style='color: #234e52; font-size: 1rem; font-weight: 500;'>News Analysis Tool</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.divider()
-        
+
         # Agent toggles
-        st.subheader("Analysis Settings")
+        st.subheader("Analysis Settings 🛠️")
         use_langchain = st.toggle("Use LangChain API", value=False)
-        
+
         st.divider()
-        
+
         # Navigation
-        st.subheader("Navigation")
+        st.subheader("Navigation 🧭")
         st.page_link("main.py", label="Home", icon="🏠")
         st.page_link("pages/history.py", label="History", icon="📚")
         st.page_link("pages/settings.py", label="Settings", icon="⚙️")
-        
+
         st.divider()
-        
+
         # About section
-        st.subheader("About")
-        st.markdown("DeFacture helps analyze news articles for context and accuracy.")
-        
-        # Version info
+        st.subheader("About 💡")
+
+
+        st.markdown(
+            """
+            <div style='background: linear-gradient(90deg, #e3f0fc 0%, #f8fafc 100%); border-radius: 12px; padding: 0.7rem 1rem; color: #234e52; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 8px rgba(180,180,200,0.07);'>
+                DeFacture helps analyze news articles for context and accuracy.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.caption("v0.1.0 | Prototype")
-        
+
     return {"use_langchain": use_langchain}

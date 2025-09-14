@@ -20,13 +20,24 @@ def render_article_input():
     dict or None
         The selected article data if an article is selected, None otherwise
     """
-    st.subheader("Select an Article")
-    
+
+
+
+    st.markdown(
+        """
+        <div class="card" style="background: linear-gradient(120deg, #38b2ac 0%, #e3f0fc 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,200,0.10); padding: 1.5rem; margin-bottom: 2rem; text-align: center;">
+            <h2 style="color: #234e52; font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Select an Article</h2>
+            <span style="color: #234e52; font-size: 1.1rem; font-weight: 500;">Choose a sample or enter a URL to analyze.</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # Input method tabs
     input_tab1, input_tab2 = st.tabs(["Sample Articles", "Enter URL"])
-    
+
     article_data = None
-    
+
     # Sample Articles tab
     with input_tab1:
         try:
@@ -35,20 +46,19 @@ def render_article_input():
             with open(sample_articles_path, "r") as f:
                 data = json.load(f)
                 sample_articles = data["articles"]
-            
-            # Create dropdown for sample articles
+
             selected_article = st.selectbox(
                 "Select a sample article:",
                 options=[article["title"] for article in sample_articles],
                 index=None,
                 placeholder="Choose an article..."
             )
-            
+
             if selected_article:
                 # Find the selected article
                 selected_article_data = next((article for article in sample_articles if article["title"] == selected_article), None)
                 st.success(f"Selected: {selected_article}")
-                
+
                 if st.button("Analyze Article", type="primary"):
                     article_data = selected_article_data
                 

@@ -42,7 +42,7 @@ def render_article_input():
         """
         <div class="card" style="background: linear-gradient(120deg, #38b2ac 0%, #e3f0fc 100%); border-radius: 14px; box-shadow: 0 2px 8px rgba(180,180,200,0.08); padding: 0.8rem; margin-bottom: 1.2rem; text-align: center;">
             <h2 style="color: #234e52; font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 1.1rem; margin-bottom: 0.3rem;">Select an Article</h2>
-            <span style="color: #234e52; font-size: 0.95rem; font-weight: 500;">Choose a sample or enter a URL to analyze.</span>
+            <span style="color: #234e52; font-size: 0.95rem; font-weight: 500;">Scroll down the page and choose a sample or enter a URL to analyze.</span>
         </div>
         """,
         unsafe_allow_html=True

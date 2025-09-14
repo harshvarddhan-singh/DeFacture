@@ -64,7 +64,7 @@ def main():
     st.markdown(
         """
         <div style="margin: 2rem 0; padding: 2rem; border-radius: 24px; background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%); box-shadow: 0 8px 32px rgba(180,180,200,0.10); text-align: center;">
-            <h2 style="font-size: 2.2rem; font-family: 'Inter', 'Segoe UI', sans-serif; color: #2563eb; margin-bottom: 0.5rem;">Welcome to DeFacture!</h2>
+            <h2 style="font-size: 2.2rem; font-family: 'Inter', 'Segoe UI', sans-serif; color: #0b2f23; margin-bottom: 0.5rem;">Welcome to DeFacture!</h2>
             <p style="font-size: 1.3rem; color: #1e293b; font-weight: 500; margin-bottom: 1.2rem;">Your streamlined tool for news analysis and fact-checking.</p>
             <span style="display: inline-block; background: linear-gradient(90deg, #e3f0fc 0%, #f8fafc 100%); color: #2563eb; padding: 0.7rem 2rem; border-radius: 16px; font-size: 1.1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(180,180,200,0.10);">Get started by selecting an article below!</span>
         </div>

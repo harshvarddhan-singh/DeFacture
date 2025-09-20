@@ -16,6 +16,8 @@ from tools.analysis import (
     mock_related_articles_chain,
     mock_fact_check_chain,
 )
+from tools.claim_extraction import extract_claims, get_claim_statistics
+from tools.fact_check_agent import fact_check_claims, get_fact_check_statistics
 
 def render_analysis_tabs(article_data=None):
     """
@@ -31,8 +33,8 @@ def render_analysis_tabs(article_data=None):
         return
 
     # Create tabs for different analysis views
-    tab_summary, tab_context, tab_related, tab_factcheck = st.tabs([
-        "Summary", "Context Analysis", "Related Articles", "Fact Check"
+    tab_summary, tab_context, tab_related, tab_claims, tab_factcheck_results = st.tabs([
+        "Summary", "Context Analysis", "Related Articles", "Extraction", "Fact Check"
     ])
 
     # Summary tab
@@ -178,14 +180,297 @@ def render_analysis_tabs(article_data=None):
             unsafe_allow_html=True
         )
 
-    # Fact Check tab
-    with tab_factcheck:
+    # Extraction tab
+    with tab_claims:
         st.markdown(
             """
-            <div class="card" style="background: linear-gradient(120deg, #f8fafc 0%, #fceabb 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="color: #ff6f91;">Fact Check</h3>
-                <span style="color: #6c63ff;">Fact check results will appear here.</span>
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(252,234,187,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(252,234,187,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #2563eb, #1e293b); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);">
+                        <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">🔍</div>
+                    </div>
+                    <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #2563eb 0%, #1e293b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Inter', 'Segoe UI', sans-serif;">
+                        Extraction Agent
+                    </h3>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
+        
+        if article_data and article_data.get("content"):
+            try:
+                with st.spinner("Extracting factual claims from article..."):
+                    claims = extract_claims(article_data["content"])
+                    stats = get_claim_statistics(claims)
+                    
+                    # Store claims in session state for Fact-Check Results tab
+                    st.session_state.extracted_claims = claims
+                
+                if claims:
+                    # Display statistics
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #234e52; margin: 0; font-size: 1.5rem;">{stats['total_claims']}</h4>
+                                <p style="color: #1e293b; margin: 0; font-size: 0.9rem;">Total Claims</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    with col2:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #234e52; margin: 0; font-size: 1.5rem;">{stats['avg_confidence']}</h4>
+                                <p style="color: #1e293b; margin: 0; font-size: 0.9rem;">Avg Confidence</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    with col3:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #f8fafc 0%, #e3f0fc 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #234e52; margin: 0; font-size: 1.5rem;">{stats['high_confidence_count']}</h4>
+                                <p style="color: #1e293b; margin: 0; font-size: 0.9rem;">High Confidence</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Display individual claims
+                    for i, claim_data in enumerate(claims, 1):
+                        claim_text = claim_data["claim"]
+                        confidence = claim_data["confidence"]
+                        
+                        # Color scheme based on confidence
+                        if confidence >= 0.8:
+                            color_scheme = {"bg": "#38b2ac", "shadow": "rgba(56, 178, 172, 0.2)", "confidence_color": "#059669"}
+                        elif confidence >= 0.6:
+                            color_scheme = {"bg": "#4169e1", "shadow": "rgba(65, 105, 225, 0.2)", "confidence_color": "#2563eb"}
+                        else:
+                            color_scheme = {"bg": "#f59e0b", "shadow": "rgba(245, 158, 11, 0.2)", "confidence_color": "#d97706"}
+                        
+                        # Escape HTML content for claims
+                        import html
+                        escaped_claim = html.escape(claim_text)
+                        
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, rgba(255, 255, 255, 0.92) 0%, rgba(227,240,252,0.88) 100%); backdrop-filter: blur(15px); border: 1px solid rgba(227,240,252,0.5); border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem; box-shadow: 0 6px 20px {color_scheme['shadow']}; position: relative; border-left: 4px solid {color_scheme['bg']};">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div style="background: {color_scheme['bg']}; color: white; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                        Claim #{i}
+                                    </div>
+                                    <div style="background: {color_scheme['confidence_color']}; color: white; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                        {int(confidence * 100)}% confidence
+                                    </div>
+                                </div>
+                                <div style="padding: 0.5rem 0;">
+                                    <p style="color: #1a202c; font-size: 1rem; line-height: 1.6; margin: 0; text-align: justify; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500;">
+                                        {escaped_claim}
+                                    </p>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                
+                else:
+                    st.markdown(
+                        """
+                        <div style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 4px 16px rgba(180,180,200,0.10); border: 1px solid #e3e3e3;">
+                            <h3 style="color: #f59e0b; font-size: 1.2rem; margin-bottom: 0.5rem;">No Claims Detected</h3>
+                            <p style="color: #1e293b; font-size: 1rem; margin-bottom: 0;">This article doesn't contain clearly identifiable factual claims with sufficient confidence.</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                
+            except Exception as e:
+                st.error(f"Error extracting claims: {str(e)}")
+                st.markdown(
+                    """
+                    <div style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 4px 16px rgba(180,180,200,0.10); border: 1px solid #e3e3e3;">
+                        <h3 style="color: #ef4444; font-size: 1.2rem; margin-bottom: 0.5rem;">⚠️ Claim Extraction Failed</h3>
+                        <p style="color: #1e293b; font-size: 1rem; margin-bottom: 0;">Please try again or select a different article.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.info("💡 Select an article to extract key information and analyze content structure.")
+
+    # Fact-Check Results tab
+    with tab_factcheck_results:
+        st.markdown(
+            """
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,240,245,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255,240,245,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+                        <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">✓</div>
+                    </div>
+                    <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Inter', 'Segoe UI', sans-serif;">
+                        Fact-Check Results
+                    </h3>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Check if we have extracted claims to fact-check
+        if hasattr(st.session_state, 'extracted_claims') and st.session_state.extracted_claims:
+            try:
+                with st.spinner("Fact-checking extracted claims..."):
+                    fact_checked_claims = fact_check_claims(st.session_state.extracted_claims)
+                    fact_check_stats = get_fact_check_statistics(fact_checked_claims)
+                
+                if fact_checked_claims:
+                    # Display fact-check statistics
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #234e52; margin: 0; font-size: 1.3rem;">{fact_check_stats['total_claims']}</h4>
+                                <p style="color: #1e293b; margin: 0; font-size: 0.85rem;">Total Checked</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    with col2:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #dcfce7 0%, #f0fdf4 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #059669; margin: 0; font-size: 1.3rem;">{fact_check_stats['accurate_count']}</h4>
+                                <p style="color: #065f46; margin: 0; font-size: 0.85rem;">Accurate</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    with col3:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #fef3c7 0%, #fffbeb 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #d97706; margin: 0; font-size: 1.3rem;">{fact_check_stats['partially_accurate_count']}</h4>
+                                <p style="color: #92400e; margin: 0; font-size: 0.85rem;">Partially Accurate</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    with col4:
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, #fee2e2 0%, #fef2f2 100%); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(180,180,200,0.1);">
+                                <h4 style="color: #dc2626; margin: 0; font-size: 1.3rem;">{fact_check_stats['false_count']}</h4>
+                                <p style="color: #991b1b; margin: 0; font-size: 0.85rem;">False</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Display individual fact-checked claims
+                    for i, claim_data in enumerate(fact_checked_claims, 1):
+                        claim_text = claim_data["claim"]
+                        verdict = claim_data["verdict"]
+                        justification = claim_data["justification"]
+                        confidence = claim_data["confidence"]
+                        
+                        # Color scheme based on verdict
+                        if verdict == "Accurate":
+                            color_scheme = {
+                                "bg": "#059669", 
+                                "shadow": "rgba(5, 150, 105, 0.2)", 
+                                "verdict_bg": "#dcfce7",
+                                "verdict_color": "#059669",
+                                "emoji": "🟢"
+                            }
+                        elif verdict == "Partially Accurate":
+                            color_scheme = {
+                                "bg": "#d97706", 
+                                "shadow": "rgba(217, 119, 6, 0.2)", 
+                                "verdict_bg": "#fef3c7",
+                                "verdict_color": "#d97706",
+                                "emoji": "🟡"
+                            }
+                        else:  # False
+                            color_scheme = {
+                                "bg": "#dc2626", 
+                                "shadow": "rgba(220, 38, 38, 0.2)", 
+                                "verdict_bg": "#fee2e2",
+                                "verdict_color": "#dc2626",
+                                "emoji": "🔴"
+                            }
+                        
+                        # Escape HTML content for claims and justification
+                        import html
+                        escaped_claim = html.escape(claim_text)
+                        escaped_justification = html.escape(justification)
+                        
+                        st.markdown(
+                            f"""
+                            <div style="background: linear-gradient(120deg, rgba(255, 255, 255, 0.92) 0%, rgba(255,240,245,0.88) 100%); backdrop-filter: blur(15px); border: 1px solid rgba(255,240,245,0.5); border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem; box-shadow: 0 6px 20px {color_scheme['shadow']}; position: relative; border-left: 4px solid {color_scheme['bg']};">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                    <div style="background: {color_scheme['bg']}; color: white; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                        Claim #{i}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="font-size: 0.9rem;">{color_scheme['emoji']}</span>
+                                        <div style="background: {color_scheme['verdict_bg']}; color: {color_scheme['verdict_color']}; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                            {verdict}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="padding: 0.5rem 0; margin-bottom: 1rem;">
+                                    <p style="color: #1a202c; font-size: 1rem; line-height: 1.6; margin: 0; text-align: justify; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500;">
+                                        {escaped_claim}
+                                    </p>
+                                </div>
+                                <div style="background: rgba(255, 255, 255, 0.6); border-radius: 8px; padding: 1rem; border: 1px solid rgba(0, 0, 0, 0.05);">
+                                    <p style="color: #6b7280; font-size: 0.9rem; line-height: 1.5; margin: 0; font-style: italic; font-family: 'Inter', 'Segoe UI', sans-serif;">
+                                        <strong>Justification:</strong> {escaped_justification}
+                                    </p>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.markdown(
+                        """
+                        <div style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 4px 16px rgba(180,180,200,0.10); border: 1px solid #e3e3e3;">
+                            <h3 style="color: #f59e0b; font-size: 1.2rem; margin-bottom: 0.5rem;">No Claims to Fact-Check</h3>
+                            <p style="color: #1e293b; font-size: 1rem; margin-bottom: 0;">No claims were extracted from this article for fact-checking.</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                
+            except Exception as e:
+                st.error(f"Error fact-checking claims: {str(e)}")
+                st.markdown(
+                    """
+                    <div style="background: linear-gradient(120deg, #fee2e2 0%, #fef2f2 100%); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: 0 4px 16px rgba(180,180,200,0.10); border: 1px solid #e3e3e3;">
+                        <h3 style="color: #ef4444; font-size: 1.2rem; margin-bottom: 0.5rem;">⚠️ Fact-Check Failed</h3>
+                        <p style="color: #1e293b; font-size: 1rem; margin-bottom: 0;">Please try again or select a different article.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.info("💡 First run the Extraction tab to extract claims, then return here for fact-checking results.")

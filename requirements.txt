@@ -1,14 +1,9 @@
 # Basic requirements for the prototype
 streamlit==1.31.0
-requests==2.31.0
-python-dotenv==1.0.0
-langchain==0.3.27
-langchain-core==0.2.10
-# OpenAI removed
-# langchain-openai==0.1.1
-# openai==1.12.0
+newspaper3k==0.2.8
+lxml_html_clean==0.4.2
 
-# Hugging Face integration
-langchain-huggingface==0.0.2
-transformers==4.37.2
-sentence-transformers==2.2.2
+# Note: Other dependencies (requests, python-dotenv, langchain packages, transformers, sentence-transformers) 
+# were removed as they are not actually imported or used in the current codebase.
+# If you plan to implement real API calls or LLM functionality in the future, 
+# you may need to add them back.

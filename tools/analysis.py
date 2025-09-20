@@ -1,11 +1,12 @@
 """
-LangChain analysis tools for DeFacture
+Analysis tools for DeFacture
 
-This module contains functions for analyzing articles using LangChain:
-- Summarization
+This module contains functions for analyzing articles:
+- Summarization (mock and real)
 - Context analysis
 - Related articles search
 - Fact checking
+- Future: Claim extraction and agent-based analysis
 """
 
 import os

@@ -9,7 +9,7 @@ This module contains the code for the analysis tabs section of the application:
 """
 
 import streamlit as st
-from tools.langchain_analysis import (
+from tools.analysis import (
     mock_summarization_chain,
     real_summarization_chain,
     mock_context_analysis_chain,

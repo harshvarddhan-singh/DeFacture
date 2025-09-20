@@ -19,8 +19,8 @@ from ui_components.sidebar import render_sidebar
 from ui_components.article_input import render_article_input
 from ui_components.analysis_tabs import render_analysis_tabs
 
-# Import LangChain analysis tools
-from tools.langchain_analysis import (
+# Import analysis tools
+from tools.analysis import (
     mock_summarization_chain,
     mock_context_analysis_chain,
     mock_related_articles_chain,

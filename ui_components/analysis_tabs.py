@@ -9,7 +9,6 @@ This module contains the code for the analysis tabs section of the application:
 """
 
 import streamlit as st
-from config.config import USE_LANGCHAIN_API
 from tools.langchain_analysis import (
     mock_summarization_chain,
     real_summarization_chain,
@@ -39,6 +38,9 @@ def render_analysis_tabs(article_data=None):
     # Summary tab
     with tab_summary:
         summary_result = None
+        
+        # Get toggle state from session state (defaults to False if not set)
+        use_langchain_toggle = st.session_state.get('use_langchain_toggle', False)
 
         # Sample articles ALWAYS use mock (keeps demo consistent)
         if article_data.get("source") == "sample":
@@ -46,12 +48,12 @@ def render_analysis_tabs(article_data=None):
 
         # URL articles: require the toggle ON for real summarizer
         elif article_data.get("source") == "url":
-            if not USE_LANGCHAIN_API:
-                st.info("ℹ️ Turn ON the LangChain toggle in the sidebar to run real summarization for URLs. Showing mock for now.")
+            if not use_langchain_toggle:
+                st.info("ℹ️ Turn ON the LangChain toggle in the sidebar to run real AI summarization for URLs. Showing mock demo for now.")
                 summary_result = mock_summarization_chain(article_data.get("content", ""))
             else:
                 try:
-                    with st.spinner("Summarizing (offline extractive)…"):
+                    with st.spinner("Running real AI summarization (offline LexRank)..."):
                         summary_result = real_summarization_chain(article_data.get("content", ""))
                 except Exception as e:
                     st.warning(f"⚠️ Real summarizer failed, falling back to mock. Error: {e}")

@@ -36,7 +36,19 @@ def render_sidebar():
 
         # Analysis Settings
         st.subheader("Analysis Settings 🛠️")
-        use_langchain = st.toggle("LangChain", value=False)
+        
+        # Store toggle state in session state so other components can access it
+        if 'use_langchain_toggle' not in st.session_state:
+            st.session_state.use_langchain_toggle = False
+            
+        use_langchain = st.toggle("LangChain", value=st.session_state.use_langchain_toggle, key="langchain_toggle")
+        st.session_state.use_langchain_toggle = use_langchain
+        
+        # Show current state
+        if use_langchain:
+            st.success("🟢 Real AI summarization enabled")
+        else:
+            st.info("🔴 Mock summarization (demo mode)")
 
         st.divider()
 

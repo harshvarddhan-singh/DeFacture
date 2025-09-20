@@ -14,7 +14,9 @@ DATA_DIR = BASE_DIR / "data"
 ASSETS_DIR = BASE_DIR / "assets"
 
 # API usage toggle
-USE_LANGCHAIN_API = False
+# True  => use real summarizer for URL articles
+# False => always use mock
+USE_LANGCHAIN_API = True
 
 # API keys and credentials (in a real app, these would be loaded from environment variables)
 API_KEYS = {

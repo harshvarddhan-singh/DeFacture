@@ -83,6 +83,7 @@ def render_article_input():
                         }
                         </style>
                     """, unsafe_allow_html=True)
+                    selected_article_data["source"] = "sample"
                     article_data = selected_article_data
                 
         except Exception as e:

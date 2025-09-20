@@ -2,6 +2,7 @@
 streamlit==1.31.0
 newspaper3k==0.2.8
 lxml_html_clean==0.4.2
+sumy==0.11.0
 
 # Note: Other dependencies (requests, python-dotenv, langchain packages, transformers, sentence-transformers) 
 # were removed as they are not actually imported or used in the current codebase.

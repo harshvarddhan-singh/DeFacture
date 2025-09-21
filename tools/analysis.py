@@ -3,7 +3,7 @@ Analysis tools for DeFacture
 
 This module contains functions for analyzing articles:
 - Summarization (mock and real)
-- Context analysis
+- Context analysis (mock and Hugging Face API)
 - Related articles search
 - Fact checking
 - Future: Claim extraction and agent-based analysis
@@ -11,8 +11,20 @@ This module contains functions for analyzing articles:
 
 import os
 import logging
+import sys
 from typing import List, Dict, Optional
 from dataclasses import dataclass
+
+# Try to import Hugging Face API integration
+try:
+    from tools.huggingface_api import huggingface_context_analysis
+    HAVE_HUGGINGFACE_API = True
+    logger = logging.getLogger(__name__)
+    logger.info("Hugging Face API module is available")
+except ImportError:
+    HAVE_HUGGINGFACE_API = False
+    logger = logging.getLogger(__name__)
+    logger.warning("Hugging Face API module not available, will use mock analysis only")
 
 # Offline extractive summarizer (no internet)
 try:
@@ -98,6 +110,82 @@ def mock_context_analysis_chain(text: str, article_data: Optional[Dict] = None) 
         "historical_context": "This article relates to ongoing discussions about this topic that began in 2023.",
         "missing_context": "The article doesn't mention some relevant background information about regulatory changes."
     }
+    
+def context_analysis_chain(text: str, article_data: Optional[Dict] = None, force_mock: bool = False, model: str = "phi-2") -> Dict:
+    """
+    Analyze article context using Hugging Face API or local model with fallback to mock
+    
+    Parameters:
+    -----------
+    text : str
+        The article text to analyze
+    article_data : dict, optional
+        Full article data including potential pre-computed mock analysis
+    force_mock : bool, optional
+        If True, forces the use of mock analysis (useful for testing)
+    model : str, optional
+        The model to use for analysis. Options: "phi-2", "phi-2-local", "bart", "mock"
+        
+    Returns:
+    --------
+    Dict
+        A dictionary containing the context analysis
+    """
+    logger.info(f"Context analysis with model: {model}")
+    
+    # If force_mock, use mock
+    if force_mock or model == "mock":
+        logger.info("Using mock context analysis (forced)")
+        return mock_context_analysis_chain(text, article_data)
+        
+    # Try local Phi-2 model if selected
+    if model == "phi-2-local":
+        # Check for PyTorch and transformers installation safely
+        try:
+            # Try to import torch and transformers without loading models
+            import importlib.util
+            torch_spec = importlib.util.find_spec("torch")
+            transformers_spec = importlib.util.find_spec("transformers")
+            
+            if torch_spec is None or transformers_spec is None:
+                logger.warning("PyTorch or Transformers not installed, falling back to API or mock")
+                # Try API if available, otherwise use mock
+                if HAVE_HUGGINGFACE_API:
+                    logger.info("Using Hugging Face API as fallback")
+                    return huggingface_context_analysis(text, "phi-2")
+                else:
+                    return mock_context_analysis_chain(text, article_data)
+                    
+            # If libraries are available, attempt to use local model
+            logger.info("Using local Phi-2 model for context analysis")
+            from tools.local_models import phi2_context_analysis
+            return phi2_context_analysis(text)
+        except ImportError as e:
+            logger.error(f"Failed to import required modules: {str(e)}")
+            logger.info("Falling back to Hugging Face API or mock")
+            # Try API if available, otherwise use mock
+            if HAVE_HUGGINGFACE_API:
+                logger.info("Using Hugging Face API as fallback")
+                return huggingface_context_analysis(text, "phi-2")
+            else:
+                return mock_context_analysis_chain(text, article_data)
+        except Exception as e:
+            logger.error(f"Error using local Phi-2 model: {str(e)}")
+            logger.info("Falling back to mock context analysis")
+            return mock_context_analysis_chain(text, article_data)
+    
+    # If Hugging Face API is not available, use mock
+    if not HAVE_HUGGINGFACE_API:
+        logger.info("Hugging Face API not available, using mock context analysis")
+        return mock_context_analysis_chain(text, article_data)
+    
+    # Use Hugging Face API
+    try:
+        logger.info(f"Using Hugging Face API with {model} model for context analysis")
+        return huggingface_context_analysis(text, model)
+    except Exception as e:
+        logger.error(f"Error with Hugging Face API: {str(e)}, falling back to mock data")
+        return mock_context_analysis_chain(text, article_data)
 
 def mock_related_articles_chain(text: str, article_data: Optional[Dict] = None) -> List[Dict]:
     """

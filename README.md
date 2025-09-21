@@ -18,9 +18,11 @@ The application intelligently handles both sample data and external APIs:
 
 1. **Sample Articles** - Pre-loaded articles from `data/sample_articles.json` for quick demos
 2. **API Integration** - When entering a custom URL, the system attempts to fetch and analyze the content
-3. **LangChain Analysis** - Choose between:
-   - Mock LLM analysis (simulated responses)
-   - Real LLM API calls (for custom URLs only, requires API key)
+3. **Context Analysis** - Choose between multiple models:
+   - **Phi-2 (Local)** - Uses locally cached Phi-2 model for fast, high-quality analysis
+   - **Phi-2 (API)** - Uses Hugging Face API with Phi-2 model
+   - **BART (API)** - Uses Hugging Face API with BART model
+   - **Mock Data** - Simulated responses for testing
 4. **Related Articles** - Find semantically similar content using:
    - Embedding-based semantic similarity (using sentence-transformers)
    - Keyword-based Jaccard similarity (as a fallback)
@@ -28,18 +30,24 @@ The application intelligently handles both sample data and external APIs:
 
 The application automatically chooses the appropriate data source based on user selection.
 
-### LLM API Integration
+### Hugging Face API Integration
 
-To enable real LLM API calls for custom URL analysis:
+DeFacture uses the Hugging Face Inference API for context analysis:
 
-1. Copy `.env.sample` to `.env`
-2. Add your OpenAI API key to the `.env` file
-3. Set `USE_LANGCHAIN_API = True` in `config.py`
+1. Set up the API key:
+   ```bash
+   python setup_huggingface_api.py
+   ```
+   This will guide you through obtaining and configuring your API key.
+
+2. Ensure `USE_LANGCHAIN_API = True` in `config.py` (default setting)
 
 When enabled, the system will:
-- Use real LLM API calls for custom URL analysis
-- Fall back to mock data for sample articles
-- Display errors if API keys are missing or invalid
+- Use Hugging Face API for context analysis of articles
+- Fall back to mock data if API is unavailable or rate-limited
+- Display informative errors if API keys are missing or invalid
+
+For detailed information, see the [Hugging Face API setup documentation](docs/huggingface_api_setup.md).
 
 ### Related Articles Feature
 
@@ -121,21 +129,66 @@ This prototype includes sample data in `data/sample_articles.json`. In a product
 
 ```
 defacture/
-├── .venv/                    # Python virtual environment
-├── api.py                   # API integration functions (placeholders)
-├── config.py                # Configuration settings
-├── data/
-│   └── sample_articles.json  # Sample article data
+├── assets/                  # CSS and static assets
+├── config/                  # Configuration settings
+├── data/                    # Data storage
+│   └── sample_articles.json # Sample article data
+├── docs/                    # Documentation
+├── extras/                  # Non-essential utilities and scripts
+│   ├── diagnostics/         # Diagnostic scripts
+│   ├── setup/               # Setup scripts
+│   └── tests/               # Informal test scripts
+├── pages/                   # Streamlit pages
+├── tests/                   # Formal test modules
+├── tools/                   # Core functionality
+│   ├── analysis.py          # Analysis tools and integrations
+│   ├── huggingface_api.py   # Hugging Face API integration
+│   ├── local_models.py      # Local model inference
+│   ├── keyword_extraction.py # Keyword extraction
+│   └── ...                  # Other tools
+├── ui_components/           # UI components
+├── utils/                   # Utility functions
 ├── main.py                  # Main Streamlit application
 ├── README.md                # Project documentation
 └── requirements.txt         # Dependencies
 ```
 
+## Local Model Inference
+
+The application can use locally cached models for faster and more efficient analysis without requiring API calls. 
+
+### Checking Local Model Availability
+
+Run the following script to check if your system is properly configured for local model inference:
+
+```bash
+python extras/diagnostics/check_local_models.py
+```
+
+This will verify:
+1. PyTorch installation
+2. Transformers library installation
+3. Whether the Phi-2 model is available in your local cache
+
+### Model Options
+
+- **Phi-2 (Local)**: Uses Microsoft's Phi-2 model directly from your local cache for best performance
+- **Phi-2 (API)**: Uses Hugging Face API to access the Phi-2 model remotely
+- **BART (API)**: Uses Hugging Face API to access the BART model remotely
+- **Mock Data**: Returns simulated responses for testing purposes
+
+### Benefits of Local Models
+
+- **Speed**: Faster analysis without network latency
+- **Cost**: No API usage fees or quotas
+- **Offline Use**: Works without internet access once models are cached
+- **Privacy**: All processing happens locally
+
 ## Future Enhancements
 
 - Real-time web scraping for article content
 - Integration with fact-checking APIs
-- Machine learning for automated summary generation
+- Additional local models for different analysis tasks
 - User authentication and saved analysis history
 - Export functionality for reports
 

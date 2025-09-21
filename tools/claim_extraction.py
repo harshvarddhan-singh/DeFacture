@@ -11,6 +11,29 @@ import re
 import logging
 from typing import List, Dict
 import nltk
+
+# Import NLTK patches - Handle patching here explicitly instead of relying on external module
+import sys
+import os
+from nltk.tag import pos_tag as original_pos_tag
+
+def _patched_pos_tag(tokens, tagset=None, lang='eng'):
+    """Custom POS tagging function that doesn't rely on problematic resources"""
+    try:
+        return original_pos_tag(tokens, tagset=tagset)
+    except LookupError:
+        # Simple fallback for POS tagging without NLTK resources
+        result = []
+        for token in tokens:
+            # Simple heuristic for proper nouns: capitalized words
+            if token and len(token) > 0 and token[0].isupper() and token.isalpha():
+                result.append((token, 'NNP'))  # Proper noun
+            else:
+                result.append((token, 'NN'))   # Regular noun
+        return result
+
+# Apply the monkey patch directly
+nltk.tag.pos_tag = _patched_pos_tag
 from nltk.tokenize import sent_tokenize
 from nltk.tokenize import word_tokenize
 from nltk.tag import pos_tag
@@ -126,7 +149,21 @@ def _contains_named_entities(sentence: str) -> bool:
         
         # Tokenize and get POS tags
         words = word_tokenize(sentence)
-        pos_tags = pos_tag(words)
+        # Use pos_tag without language parameter (uses default English tagger)
+        try:
+            pos_tags = pos_tag(words)
+        except LookupError as le:
+            if 'averaged_perceptron_tagger' in str(le):
+                # Try to download correct tagger
+                try:
+                    nltk.download('averaged_perceptron_tagger', quiet=True)
+                    pos_tags = pos_tag(words)
+                except Exception:
+                    logger.warning("Could not use POS tagger even after download attempt")
+                    # Fallback to simple regex
+                    return bool(re.search(r'[A-Z][a-z]+', sentence))
+            else:
+                raise
         
         # Look for proper nouns (NNP, NNPS) which often indicate named entities
         for word, tag in pos_tags:

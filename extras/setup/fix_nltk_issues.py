@@ -2,7 +2,7 @@
 Fix NLTK tagger compatibility issues in DeFacture project
 
 This script patches the tools/claim_extraction.py file to handle the 
-'averaged_perceptron_tagger_eng' vs 'averaged_perceptron_tagger' compatibility issue.
+'averaged_perceptron_tagger' vs 'averaged_perceptron_tagger' compatibility issue.
 """
 
 import os
@@ -23,8 +23,8 @@ def fix_tagger_reference():
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Replace 'averaged_perceptron_tagger_eng' with 'averaged_perceptron_tagger'
-    pattern = r'averaged_perceptron_tagger_eng'
+    # Replace 'averaged_perceptron_tagger' with 'averaged_perceptron_tagger'
+    pattern = r'averaged_perceptron_tagger'
     if pattern in content:
         print(f"🔍 Found {pattern} reference, fixing...")
         new_content = content.replace(pattern, 'averaged_perceptron_tagger')

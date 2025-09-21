@@ -51,10 +51,10 @@ try:
         except Exception as e:
             logger.warning(f"Error downloading NER data: {str(e)}")
     
-    # Fix for averaged_perceptron_tagger_eng error
+    # Fix for averaged_perceptron_tagger error
     try:
         # This is a specific error that occurs in some environments
-        nltk.data.find('taggers/averaged_perceptron_tagger_eng')
+        nltk.data.find('taggers/averaged_perceptron_tagger')
     except LookupError:
         try:
             # Try to manually download the required resource
@@ -183,7 +183,7 @@ def extract_named_entities(text: str, max_entities: int = 10) -> List[str]:
         return named_entities[:max_entities]
     except Exception as e:
         # Check if it's the specific error we know about
-        if "averaged_perceptron_tagger_eng" in str(e):
+        if "averaged_perceptron_tagger" in str(e):
             # Mark this function to skip in future calls 
             extract_named_entities._skip_ner = True
             return []

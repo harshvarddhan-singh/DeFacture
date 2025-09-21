@@ -9,15 +9,22 @@ This module contains the code for the analysis tabs section of the application:
 """
 
 import streamlit as st
+import logging
 from tools.analysis import (
     mock_summarization_chain,
     real_summarization_chain,
     mock_context_analysis_chain,
+    context_analysis_chain,
     mock_related_articles_chain,
     mock_fact_check_chain,
 )
 from tools.claim_extraction import extract_claims, get_claim_statistics
 from tools.fact_check_agent import fact_check_claims, get_fact_check_statistics
+from tools.huggingface_api import generate_context_summary
+from config.config import USE_LANGCHAIN_API
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 def render_analysis_tabs(article_data=None):
     """
@@ -245,7 +252,78 @@ def render_analysis_tabs(article_data=None):
 
     # Context Analysis tab
     with tab_context:
-        context_result = mock_context_analysis_chain(article_data.get("content", ""), article_data)
+        # Add model selection with better descriptions
+        if "context_tab_model" not in st.session_state:
+            st.session_state.context_tab_model = "phi-2-local"  # Default to local phi-2 for context analysis
+        
+        # Create a model selector in the sidebar if not already there
+        with st.sidebar.expander("🧠 Context Analysis Model"):
+            # Check if local models are available
+            has_local_models = False
+            try:
+                import torch
+                import importlib.util
+                transformers_spec = importlib.util.find_spec("transformers")
+                has_local_models = transformers_spec is not None
+            except ImportError:
+                has_local_models = False
+            
+            # Define model options and their descriptions
+            model_options = [
+                {"id": "phi-2-local", 
+                 "name": f"Phi-2 (Local){' ✓' if has_local_models else ' ⚠️'}", 
+                 "desc": "Uses locally cached Phi-2 model (fastest, best quality)" if has_local_models else "Local model requires PyTorch and Transformers (not detected)"},
+                {"id": "phi-2", 
+                 "name": "Phi-2 (API)", 
+                 "desc": "Uses Hugging Face API with Phi-2 (good quality, uses API quota)"},
+                {"id": "bart", 
+                 "name": "BART (API)", 
+                 "desc": "Uses Hugging Face API with BART (simpler analysis)"},
+                {"id": "mock", 
+                 "name": "Mock Data", 
+                 "desc": "Uses mock data (no model, for testing only)"}
+            ]
+            
+            # Create radio buttons with descriptions
+            selected_option = st.radio(
+                "Context Analysis Model",
+                options=[opt["id"] for opt in model_options],
+                format_func=lambda x: next((opt["name"] for opt in model_options if opt["id"] == x), x),
+                index=[opt["id"] for opt in model_options].index(st.session_state.context_tab_model),
+                help="Select the model to use for context analysis"
+            )
+            
+            # Show description for selected model
+            selected_desc = next((opt["desc"] for opt in model_options if opt["id"] == selected_option), "")
+            st.caption(selected_desc)
+            
+            # Update session state
+            st.session_state.context_tab_model = selected_option
+        
+        # Use context_analysis_chain with selected model
+        with st.spinner(f"Analyzing context using {st.session_state.context_tab_model.split('-')[0].upper()} model..."):
+            context_result = context_analysis_chain(
+                article_data.get("content", ""),
+                article_data,
+                model=st.session_state.context_tab_model
+            )
+            
+            # Show the model source with icon and styling
+            if st.session_state.context_tab_model == "phi-2-local":
+                model_source = "Local"
+                model_icon = "💻"
+                color = "green"
+            elif st.session_state.context_tab_model == "mock":
+                model_source = "Mock"
+                model_icon = "🔄"
+                color = "gray"
+            else:
+                model_source = "API"
+                model_icon = "🌐"
+                color = "blue"
+            
+            model_name = st.session_state.context_tab_model.split('-')[0].upper()
+            st.markdown(f"<div style='color: {color}; font-size: 0.9em;'>{model_icon} Analysis performed using: <b>{model_name}</b> ({model_source})</div>", unsafe_allow_html=True)
         
         # Render context analysis in beautiful card
         st.markdown(
@@ -263,6 +341,93 @@ def render_analysis_tabs(article_data=None):
             """,
             unsafe_allow_html=True
         )
+        
+        # Generate AI summary using Hugging Face API if USE_LANGCHAIN_API is enabled
+        if USE_LANGCHAIN_API:
+            # Summary model options
+            summary_models = ["bart", "phi-2"]
+            selected_summary_model = "bart"  # Default to BART for summaries
+            
+            # Create a model selector in the sidebar if not already there
+            if "selected_summary_model" not in st.session_state:
+                st.session_state.selected_summary_model = selected_summary_model
+                
+            with st.sidebar.expander("🔧 AI Model Settings"):
+                st.session_state.selected_summary_model = st.selectbox(
+                    "Summary Generation Model",
+                    summary_models,
+                    index=summary_models.index(st.session_state.selected_summary_model),
+                    help="Select the AI model to use for summary generation"
+                )
+                
+            with st.spinner(f"Generating article summary with {st.session_state.selected_summary_model.upper()} model..."):
+                summary_text, success = generate_context_summary(
+                    article_data.get("content", ""), 
+                    "summary",
+                    model=st.session_state.selected_summary_model
+                )
+                
+                if success:
+                    model_name = "BART-CNN" if st.session_state.selected_summary_model == "bart" else "Phi-2"
+                    st.markdown(
+                        f"""
+                        <div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                            <h4 style="color: #2d3748; margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                                <span style="margin-right: 0.5rem;">📝</span> AI-Generated Summary ({model_name})
+                            </h4>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    st.markdown(
+                        f"""
+                        <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 4px solid #8BB8DF;">
+                            <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 0.95rem;">{summary_text}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.error(f"Failed to generate summary: {summary_text}")
+            
+            # Context analysis model selection
+            if "selected_context_model" not in st.session_state:
+                st.session_state.selected_context_model = "phi-2"  # Default to phi-2 for analysis
+                
+            with st.spinner(f"Analyzing missing context with {st.session_state.selected_context_model.upper()} model..."):
+                missing_context, success = generate_context_summary(
+                    article_data.get("content", ""), 
+                    "missing_context",
+                    model=st.session_state.selected_context_model
+                )
+                
+                if success:
+                    model_name = "Phi-2" if st.session_state.selected_context_model == "phi-2" else "BART-CNN"
+                    st.markdown(
+                        f"""
+                        <div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                            <h4 style="color: #2d3748; margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                                <span style="margin-right: 0.5rem;">🧩</span> Missing Context Analysis ({model_name})
+                            </h4>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    st.markdown(
+                        f"""
+                        <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 4px solid #F6AD55;">
+                            <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 0.95rem;">{missing_context}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.error(f"Failed to analyze missing context: {missing_context}")
+        
+        # Display a message if API is disabled
+        else:
+            st.info("Enable API in settings to use Hugging Face's BART-CNN model for generating summaries and missing context analysis.")
+            st.write("")
         
         # Perspective
         import html
@@ -481,6 +646,34 @@ def render_analysis_tabs(article_data=None):
                     </div>
                     """
                 
+                # Generate summary for related article if API is enabled and it's one of the top 3
+                summary_html = ""
+                if USE_LANGCHAIN_API and i < 3:
+                    # Try to extract article content if it exists
+                    article_content = article.get('content', '')
+                    
+                    # If we have content, generate a summary
+                    if article_content and len(article_content) > 200:  # Only if there's substantial content
+                        with st.spinner(f"Generating summary for related article '{escaped_title}'..."):
+                            try:
+                                summary_text, success = generate_context_summary(article_content, "summary")
+                                
+                                if success:
+                                    summary_html = f"""
+                                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(203, 213, 225, 0.1); border-radius: 8px; border-left: 3px solid #8BB8DF;">
+                                        <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #4b5563; font-weight: 500;">
+                                            AI-Generated Summary:
+                                        </p>
+                                        <p style="margin: 0; font-size: 0.85rem; color: #4b5563;">
+                                            {html.escape(summary_text)}
+                                        </p>
+                                    </div>
+                                    """
+                            except Exception as e:
+                                # Silently handle errors for related articles summaries
+                                logger.error(f"Error generating summary for related article: {str(e)}")
+                                pass
+                
                 st.markdown(
                     f"""
                     <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); transition: all 0.2s ease;">
@@ -518,6 +711,7 @@ def render_analysis_tabs(article_data=None):
                         </div>
                         
                         {explanation_html}
+                        {summary_html}
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -663,6 +857,10 @@ def render_analysis_tabs(article_data=None):
 
     # Fact-Check Results tab
     with tab_factcheck_results:
+        # Set a flag in session state to indicate that the fact check tab was used
+        # This will be used to increment the fact check counter in main.py
+        st.session_state.used_fact_check_tab = True
+        
         st.markdown(
             """
             <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,240,245,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255,240,245,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem;">

@@ -26,7 +26,7 @@ DATA_DIR = BASE_DIR / "data"
 ASSETS_DIR = BASE_DIR / "assets"
 
 # API usage toggle
-# True  => use real summarizer for URL articles
+# True  => use real API for article analysis
 # False => always use mock
 USE_LANGCHAIN_API = True
 
@@ -36,6 +36,7 @@ API_KEYS = {
     "serp_api": os.environ.get("SERP_API_KEY", ""),
     "google_search_api": os.environ.get("GOOGLE_SEARCH_API_KEY", ""),
     "google_search_engine_id": os.environ.get("GOOGLE_SEARCH_ENGINE_ID", ""),
+    "huggingface_api": os.environ.get("HUGGINGFACE_API_KEY", ""),
 }
 
 # Model configuration

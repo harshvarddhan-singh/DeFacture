@@ -61,6 +61,29 @@ except Exception as e:
 def main():
     """Main application function with modular components"""
     
+    # Initialize application metrics if they don't exist
+    if 'metrics' not in st.session_state:
+        st.session_state.metrics = {
+            'articles_analyzed': 0,
+            'sources_tracked': 0,
+            'fact_checks': 0
+        }
+        
+    # Load metrics from data file if it exists (simulated here)
+    # In a real app, this would load from a database or file
+    try:
+        # This is just a placeholder - in a real app you'd load from a file or database
+        # For demo purposes, we'll set some initial values if they don't exist
+        if st.session_state.metrics['articles_analyzed'] == 0:
+            # Set some initial demo values
+            st.session_state.metrics.update({
+                'articles_analyzed': 12,  # Demo value
+                'sources_tracked': 8,    # Demo value
+                'fact_checks': 6        # Demo value
+            })
+    except Exception as e:
+        st.error(f"Error loading metrics: {str(e)}")
+    
     # 1. Render the sidebar
     sidebar_options = render_sidebar()
 
@@ -87,9 +110,36 @@ def main():
     if article_data and st.session_state.get('analysis_mode', False):
         # Run analysis (would connect to actual analysis in a real app)
         with st.spinner("Analyzing article..."):
+            # Update metrics when an article is analyzed
+            # Only increment for new articles (check if already analyzed)
+            article_id = article_data.get('id', '')
+            if 'analyzed_articles' not in st.session_state:
+                st.session_state.analyzed_articles = set()
+                
+            if article_id and article_id not in st.session_state.analyzed_articles:
+                # Increment the articles analyzed counter
+                st.session_state.metrics['articles_analyzed'] += 1
+                
+                # Track this article as analyzed
+                st.session_state.analyzed_articles.add(article_id)
+                
+                # Track the source if available
+                source = article_data.get('source_name', '')
+                if source and 'tracked_sources' not in st.session_state:
+                    st.session_state.tracked_sources = set()
+                    
+                if source and source not in st.session_state.get('tracked_sources', set()):
+                    st.session_state.tracked_sources.add(source)
+                    st.session_state.metrics['sources_tracked'] += 1
+            
             # Here we're just passing the article data to the tabs component
-            # In a real app, we would run the analysis here first
             render_analysis_tabs(article_data)
+            
+            # Increment fact checks when using fact check tab
+            if st.session_state.get('used_fact_check_tab', False):
+                st.session_state.metrics['fact_checks'] += 1
+                # Reset the flag
+                st.session_state.used_fact_check_tab = False
     
 # Run the application
 if __name__ == "__main__":

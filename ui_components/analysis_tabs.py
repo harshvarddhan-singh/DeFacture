@@ -46,34 +46,65 @@ def render_analysis_tabs(article_data=None):
 
         # Sample articles ALWAYS use mock (keeps demo consistent)
         if article_data.get("source") == "sample":
-            summary_result = mock_summarization_chain(article_data.get("content", ""))
+            summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
 
         # URL articles: require the toggle ON for real summarizer
         elif article_data.get("source") == "url":
             if not use_langchain_toggle:
                 st.info("ℹ️ Turn ON the LangChain toggle in the sidebar to run real AI summarization for URLs. Showing mock demo for now.")
-                summary_result = mock_summarization_chain(article_data.get("content", ""))
+                summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
             else:
                 try:
                     with st.spinner("Running real AI summarization (offline LexRank)..."):
                         summary_result = real_summarization_chain(article_data.get("content", ""))
                 except Exception as e:
                     st.warning(f"⚠️ Real summarizer failed, falling back to mock. Error: {e}")
-                    summary_result = mock_summarization_chain(article_data.get("content", ""))
+                    summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
+
+        # Search results (SERP API): support real AI analysis with toggle
+        elif article_data.get("source") == "search_result":
+            if not use_langchain_toggle:
+                st.info("ℹ️ Turn ON the LangChain toggle in the sidebar to run real AI summarization for SERP articles. Showing mock demo for now.")
+                summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
+            else:
+                try:
+                    with st.spinner("Running real AI summarization on SERP article..."):
+                        summary_result = real_summarization_chain(article_data.get("content", ""))
+                except Exception as e:
+                    st.warning(f"⚠️ Real summarizer failed, falling back to mock. Error: {e}")
+                    summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
 
         # Fallback if source unknown
         else:
-            summary_result = mock_summarization_chain(article_data.get("content", ""))
+            summary_result = mock_summarization_chain(article_data.get("content", ""), article_data)
 
-        # Render in beautiful card
+        # Render in beautiful card with original gradient styling
         st.markdown(
             """
-            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(227,240,252,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(227,240,252,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(227,240,252,0.8) 100%); 
+                        backdrop-filter: blur(20px); 
+                        border: 1px solid rgba(227,240,252,0.3); 
+                        border-radius: 20px; 
+                        box-shadow: 0 8px 32px rgba(180,180,200,0.1); 
+                        padding: 2rem; 
+                        margin-bottom: 1.5rem; 
+                        position: relative; 
+                        overflow: hidden;">
                 <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
-                    <div style="background: linear-gradient(135deg, #234e52, #38b2ac); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(35, 78, 82, 0.3);">
+                    <div style="background: linear-gradient(135deg, #234e52, #38b2ac); 
+                                border-radius: 12px; 
+                                padding: 0.7rem; 
+                                margin-right: 1rem; 
+                                box-shadow: 0 4px 15px rgba(35, 78, 82, 0.3);">
                         <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">📄</div>
                     </div>
-                    <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #234e52 0%, #38b2ac 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <h3 style="color: #234e52; 
+                              font-size: 1.4rem; 
+                              font-weight: 700; 
+                              margin: 0; 
+                              background: linear-gradient(135deg, #234e52 0%, #38b2ac 100%); 
+                              -webkit-background-clip: text; 
+                              -webkit-text-fill-color: transparent;">
                         Article Summary
                     </h3>
                 </div>
@@ -87,8 +118,20 @@ def render_analysis_tabs(article_data=None):
         escaped_summary = html.escape(summary_result.get('summary', 'No summary available.'))
         st.markdown(
             f"""
-            <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(227, 240, 252, 0.88) 100%); border-left: 4px solid #38b2ac; border-radius: 0 16px 16px 0; padding: 1.8rem; margin-bottom: 1rem; box-shadow: 0 4px 16px rgba(180,180,200,0.12); border: 1px solid rgba(227,240,252,0.4);">
-                <p style="color: #1a202c; font-size: 1.05rem; line-height: 1.7; margin: 0; text-align: justify; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500;">
+            <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(227, 240, 252, 0.88) 100%); 
+                        border-left: 4px solid #38b2ac; 
+                        border-radius: 0 16px 16px 0; 
+                        padding: 1.8rem; 
+                        margin-bottom: 1rem; 
+                        box-shadow: 0 4px 16px rgba(180,180,200,0.12); 
+                        border: 1px solid rgba(227,240,252,0.4);">
+                <p style="color: #1a202c; 
+                         font-size: 1.05rem; 
+                         line-height: 1.7; 
+                         margin: 0; 
+                         text-align: justify; 
+                         font-family: 'Inter', 'Segoe UI', sans-serif; 
+                         font-weight: 500;">
                     {escaped_summary}
                 </p>
             </div>
@@ -112,12 +155,29 @@ def render_analysis_tabs(article_data=None):
         if summary_result.get("key_points"):
             st.markdown(
                 """
-                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(252,234,187,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(252,234,187,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem;">
+                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(252,234,187,0.8) 100%); 
+                            backdrop-filter: blur(20px); 
+                            border: 1px solid rgba(252,234,187,0.3); 
+                            border-radius: 20px; 
+                            box-shadow: 0 8px 32px rgba(180,180,200,0.1); 
+                            padding: 2rem; 
+                            margin-bottom: 1.5rem;">
                     <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
-                        <div style="background: linear-gradient(135deg, #4169e1, #4682b4); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(65, 105, 225, 0.3);">
+                        <div style="background: linear-gradient(135deg, #4169e1, #4682b4); 
+                                    border-radius: 12px; 
+                                    padding: 0.7rem; 
+                                    margin-right: 1rem; 
+                                    box-shadow: 0 4px 15px rgba(65, 105, 225, 0.3);">
                             <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">🎯</div>
                         </div>
-                        <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #4169e1 0%, #4682b4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Inter', 'Segoe UI', sans-serif;">
+                        <h3 style="color: #234e52; 
+                                  font-size: 1.4rem; 
+                                  font-weight: 700; 
+                                  margin: 0; 
+                                  background: linear-gradient(135deg, #4169e1 0%, #4682b4 100%); 
+                                  -webkit-background-clip: text; 
+                                  -webkit-text-fill-color: transparent; 
+                                  font-family: 'Inter', 'Segoe UI', sans-serif;">
                             Key Takeaways
                         </h3>
                     </div>
@@ -126,7 +186,7 @@ def render_analysis_tabs(article_data=None):
                 unsafe_allow_html=True
             )
             
-            # Individual key point cards with app's color scheme
+            # Individual key point cards with sophisticated styling
             for i, point in enumerate(summary_result["key_points"], 1):
                 # Sophisticated color schemes matching the app
                 colors = [
@@ -142,12 +202,39 @@ def render_analysis_tabs(article_data=None):
                 escaped_point = html.escape(point)
                 st.markdown(
                     f"""
-                    <div style="background: linear-gradient(120deg, rgba(255, 255, 255, 0.92) 0%, rgba(227,240,252,0.88) 100%); backdrop-filter: blur(15px); border: 1px solid rgba(227,240,252,0.5); border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem; box-shadow: 0 6px 20px {color_scheme['shadow']}; position: relative; border-left: 4px solid {color_scheme['bg']};">
-                        <div style="position: absolute; top: -8px; left: 15px; background: {color_scheme['bg']}; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 8px {color_scheme['shadow']};">
+                    <div style="background: linear-gradient(120deg, rgba(255, 255, 255, 0.92) 0%, rgba(227,240,252,0.88) 100%); 
+                                backdrop-filter: blur(15px); 
+                                border: 1px solid rgba(227,240,252,0.5); 
+                                border-radius: 16px; 
+                                padding: 1.4rem; 
+                                margin-bottom: 1rem; 
+                                box-shadow: 0 6px 20px {color_scheme['shadow']}; 
+                                position: relative; 
+                                border-left: 4px solid {color_scheme['bg']};">
+                        <div style="position: absolute; 
+                                    top: -8px; 
+                                    left: 15px; 
+                                    background: {color_scheme['bg']}; 
+                                    color: white; 
+                                    border-radius: 50%; 
+                                    width: 28px; 
+                                    height: 28px; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    font-size: 0.85rem; 
+                                    font-weight: bold; 
+                                    box-shadow: 0 2px 8px {color_scheme['shadow']};">
                             {i}
                         </div>
                         <div style="margin-top: 0.5rem; padding-left: 0.5rem;">
-                            <p style="color: #1a202c; font-size: 1rem; line-height: 1.6; margin: 0; text-align: justify; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500;">
+                            <p style="color: #1a202c; 
+                                     font-size: 1rem; 
+                                     line-height: 1.6; 
+                                     margin: 0; 
+                                     text-align: justify; 
+                                     font-family: 'Inter', 'Segoe UI', sans-serif; 
+                                     font-weight: 500;">
                                 {escaped_point}
                             </p>
                         </div>
@@ -158,27 +245,192 @@ def render_analysis_tabs(article_data=None):
 
     # Context Analysis tab
     with tab_context:
+        context_result = mock_context_analysis_chain(article_data.get("content", ""), article_data)
+        
+        # Render context analysis in beautiful card
         st.markdown(
             """
-            <div class="card" style="background: linear-gradient(120deg, #f8fafc 0%, #fceabb 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="color: #ff6f91;">Context Analysis</h3>
-                <span style="color: #6c63ff;">Context analysis will appear here.</span>
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(252,234,187,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(252,234,187,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #234e52, #38b2ac); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(35, 78, 82, 0.3);">
+                        <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">🔍</div>
+                    </div>
+                    <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #234e52 0%, #38b2ac 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Context Analysis
+                    </h3>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
+        
+        # Perspective
+        import html
+        escaped_perspective = html.escape(context_result.get('perspective', 'No perspective analysis available.'))
+        st.markdown(
+            f"""
+            <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 4px solid #38b2ac;">
+                <h4 style="color: #2d3748; margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                    <span style="margin-right: 0.5rem;">👁️</span> Perspective
+                </h4>
+                <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 0.95rem;">{escaped_perspective}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Bias Indicators
+        bias_indicators = context_result.get('bias_indicators', [])
+        if bias_indicators:
+            st.markdown(
+                """
+                <h4 style="color: #2d3748; margin: 1.5rem 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                    <span style="margin-right: 0.5rem;">⚖️</span> Bias Indicators
+                </h4>
+                """,
+                unsafe_allow_html=True
+            )
+            for indicator in bias_indicators:
+                escaped_indicator = html.escape(indicator)
+                st.markdown(
+                    f"""
+                    <div style="background: rgba(255,255,255,0.9); border-radius: 10px; padding: 1rem; margin-bottom: 0.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border-left: 3px solid #fbb6ce;">
+                        <p style="color: #4a5568; line-height: 1.5; margin: 0; font-size: 0.9rem;">• {escaped_indicator}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        
+        # Historical Context
+        historical_context = context_result.get('historical_context', '')
+        if historical_context:
+            escaped_historical = html.escape(historical_context)
+            st.markdown(
+                f"""
+                <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 1.5rem; margin: 1.5rem 0 1rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 4px solid #9f7aea;">
+                    <h4 style="color: #2d3748; margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                        <span style="margin-right: 0.5rem;">📚</span> Historical Context
+                    </h4>
+                    <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 0.95rem;">{escaped_historical}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        
+        # Missing Context
+        missing_context = context_result.get('missing_context', '')
+        if missing_context:
+            escaped_missing = html.escape(missing_context)
+            st.markdown(
+                f"""
+                <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-left: 4px solid #ed8936;">
+                    <h4 style="color: #2d3748; margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center;">
+                        <span style="margin-right: 0.5rem;">⚠️</span> Missing Context
+                    </h4>
+                    <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 0.95rem;">{escaped_missing}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
     # Related Articles tab
     with tab_related:
+        related_articles = mock_related_articles_chain(article_data.get("content", ""), article_data)
+        
+        # Render related articles in beautiful card
         st.markdown(
             """
-            <div class="card" style="background: linear-gradient(120deg, #fceabb 0%, #f8fafc 100%); border-radius: 18px; box-shadow: 0 4px 16px rgba(180,180,255,0.10); padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="color: #6c63ff;">Related Articles</h3>
-                <span style="color: #ff6f91;">Related articles will appear here.</span>
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(252,234,187,0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(252,234,187,0.3); border-radius: 20px; box-shadow: 0 8px 32px rgba(180,180,200,0.1); padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="background: linear-gradient(135deg, #234e52, #38b2ac); border-radius: 12px; padding: 0.7rem; margin-right: 1rem; box-shadow: 0 4px 15px rgba(35, 78, 82, 0.3);">
+                        <div style="width: 24px; height: 24px; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">🔗</div>
+                    </div>
+                    <h3 style="color: #234e52; font-size: 1.4rem; font-weight: 700; margin: 0; background: linear-gradient(135deg, #234e52 0%, #38b2ac 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Related Articles
+                    </h3>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
+        
+        if related_articles:
+            for i, article in enumerate(related_articles):
+                # Determine relevance color
+                relevance = article.get('relevance', 'Medium').lower()
+                if relevance == 'high':
+                    relevance_color = '#10b981'
+                    relevance_bg = 'rgba(16, 185, 129, 0.1)'
+                elif relevance == 'medium':
+                    relevance_color = '#f59e0b'
+                    relevance_bg = 'rgba(245, 158, 11, 0.1)'
+                else:
+                    relevance_color = '#6b7280'
+                    relevance_bg = 'rgba(107, 114, 128, 0.1)'
+                
+                # Determine perspective color
+                perspective = article.get('perspective', 'Similar').lower()
+                if perspective == 'supporting':
+                    perspective_color = '#10b981'
+                    perspective_icon = '✅'
+                elif perspective == 'opposing':
+                    perspective_color = '#ef4444'
+                    perspective_icon = '❌'
+                elif perspective == 'critical':
+                    perspective_color = '#f59e0b'
+                    perspective_icon = '⚠️'
+                else:
+                    perspective_color = '#6366f1'
+                    perspective_icon = '🔄'
+                
+                import html
+                escaped_title = html.escape(article.get('title', 'Untitled'))
+                escaped_source = html.escape(article.get('source', 'Unknown Source'))
+                escaped_url = html.escape(article.get('url', '#'))
+                
+                st.markdown(
+                    f"""
+                    <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); transition: all 0.2s ease;">
+                        <div style="display: flex; justify-content: between; align-items: flex-start; margin-bottom: 1rem;">
+                            <h4 style="color: #1a202c; margin: 0; font-size: 1.05rem; font-weight: 600; flex: 1; line-height: 1.4;">
+                                <a href="{escaped_url}" target="_blank" style="color: #2563eb; text-decoration: none; transition: color 0.2s ease;">{escaped_title}</a>
+                            </h4>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span style="font-size: 0.8rem;">📰</span>
+                                <span style="color: #4a5568; font-size: 0.85rem; font-weight: 500;">{escaped_source}</span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span style="font-size: 0.8rem;">📅</span>
+                                <span style="color: #6b7280; font-size: 0.8rem;">{article.get('date', 'Unknown Date')}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem;">
+                            <span style="background: {relevance_bg}; color: {relevance_color}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                {article.get('relevance', 'Medium')} Relevance
+                            </span>
+                            
+                            <span style="background: rgba({perspective_color[1:]}, 0.1); color: {perspective_color}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
+                                {perspective_icon} {article.get('perspective', 'Similar')}
+                            </span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
+                """
+                <div style="background: rgba(255,255,255,0.9); border-radius: 15px; padding: 2rem; text-align: center; color: #6b7280;">
+                    <p style="margin: 0; font-size: 0.95rem;">No related articles found.</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
     # Extraction tab
     with tab_claims:
@@ -327,8 +579,101 @@ def render_analysis_tabs(article_data=None):
             unsafe_allow_html=True
         )
         
-        # Check if we have extracted claims to fact-check
-        if hasattr(st.session_state, 'extracted_claims') and st.session_state.extracted_claims:
+        # For sample articles, use mock fact check results directly
+        if article_data.get("source") == "sample" and article_data.get("mock_analysis", {}).get("fact_check"):
+            fact_check_result = article_data["mock_analysis"]["fact_check"]
+            
+            # Overall Assessment
+            overall_assessment = fact_check_result.get('overall_assessment', 'Unknown')
+            assessment_color = {
+                'Highly Accurate': '#10b981',
+                'Mostly Accurate': '#3b82f6', 
+                'Partially Accurate': '#f59e0b',
+                'Inaccurate': '#ef4444'
+            }.get(overall_assessment, '#6b7280')
+            
+            import html
+            escaped_assessment = html.escape(overall_assessment)
+            st.markdown(
+                f"""
+                <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); text-align: center;">
+                    <h4 style="color: #1a202c; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 600;">Overall Assessment</h4>
+                    <div style="display: inline-block; background: {assessment_color}; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        {escaped_assessment}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
+            # Individual Claims
+            claims = fact_check_result.get('claims', [])
+            if claims:
+                st.markdown(
+                    """
+                    <h4 style="color: #1a202c; margin: 1.5rem 0 1rem 0; font-size: 1.1rem; font-weight: 600;">
+                        📋 Individual Claims Analysis
+                    </h4>
+                    """,
+                    unsafe_allow_html=True
+                )
+                
+                for i, claim in enumerate(claims, 1):
+                    assessment = claim.get('assessment', 'Unknown')
+                    claim_text = claim.get('claim', '')
+                    evidence = claim.get('evidence', '')
+                    
+                    # Color scheme based on assessment
+                    color_schemes = {
+                        'Accurate': {
+                            'bg': '#10b981', 'emoji': '✅', 'shadow': 'rgba(16, 185, 129, 0.2)',
+                            'verdict_bg': '#d1fae5', 'verdict_color': '#065f46'
+                        },
+                        'Partially Accurate': {
+                            'bg': '#f59e0b', 'emoji': '⚠️', 'shadow': 'rgba(245, 158, 11, 0.2)',
+                            'verdict_bg': '#fef3c7', 'verdict_color': '#92400e'
+                        },
+                        'False': {
+                            'bg': '#ef4444', 'emoji': '❌', 'shadow': 'rgba(239, 68, 68, 0.2)',
+                            'verdict_bg': '#fee2e2', 'verdict_color': '#991b1b'
+                        }
+                    }
+                    color_scheme = color_schemes.get(assessment, color_schemes['Partially Accurate'])
+                    
+                    escaped_claim = html.escape(claim_text)
+                    escaped_evidence = html.escape(evidence)
+                    
+                    st.markdown(
+                        f"""
+                        <div style="background: linear-gradient(120deg, rgba(255, 255, 255, 0.92) 0%, rgba(255,240,245,0.88) 100%); backdrop-filter: blur(15px); border: 1px solid rgba(255,240,245,0.5); border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem; box-shadow: 0 6px 20px {color_scheme['shadow']}; position: relative; border-left: 4px solid {color_scheme['bg']};">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                <div style="background: {color_scheme['bg']}; color: white; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                    Claim #{i}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 0.9rem;">{color_scheme['emoji']}</span>
+                                    <div style="background: {color_scheme['verdict_bg']}; color: {color_scheme['verdict_color']}; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: bold;">
+                                        {assessment}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="padding: 0.5rem 0; margin-bottom: 1rem;">
+                                <p style="color: #1a202c; font-size: 1rem; line-height: 1.6; margin: 0; text-align: justify; font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500;">
+                                    {escaped_claim}
+                                </p>
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.6); border-radius: 8px; padding: 1rem; border: 1px solid rgba(0, 0, 0, 0.05);">
+                                <p style="color: #6b7280; font-size: 0.9rem; line-height: 1.5; margin: 0; font-style: italic; font-family: 'Inter', 'Segoe UI', sans-serif;">
+                                    <strong>Evidence:</strong> {escaped_evidence}
+                                </p>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+            
+        # For non-sample articles, check if we have extracted claims to fact-check (existing logic)
+        elif hasattr(st.session_state, 'extracted_claims') and st.session_state.extracted_claims:
             try:
                 with st.spinner("Fact-checking extracted claims..."):
                     fact_checked_claims = fact_check_claims(st.session_state.extracted_claims)
@@ -473,4 +818,9 @@ def render_analysis_tabs(article_data=None):
                     unsafe_allow_html=True
                 )
         else:
-            st.info("💡 First run the Extraction tab to extract claims, then return here for fact-checking results.")
+            # For non-sample articles or when no pre-computed results available, encourage using Extraction tab
+            if article_data.get("source") == "sample":
+                # This shouldn't happen if sample articles have mock_analysis, but fallback
+                st.warning("⚠️ Sample article is missing fact-check analysis data.")
+            else:
+                st.info("💡 First run the Extraction tab to extract claims, then return here for fact-checking results.")

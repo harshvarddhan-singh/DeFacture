@@ -43,6 +43,14 @@ def load_css():
     css_path = Path(__file__).parent / "assets" / "styles.css"
     with open(css_path, "r") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
+    # Load Font Awesome for consistent icons
+    st.markdown(
+        """
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        """,
+        unsafe_allow_html=True
+    )
 
 try:
     load_css()
@@ -60,13 +68,13 @@ def main():
     render_header()
 
 
-    # 2.5. Hero Section (minimal blue/gray/white/black)
+    # 2.5. Ultra-tight Hero Section
     st.markdown(
         """
-        <div style="margin: 2rem 0; padding: 2rem; border-radius: 24px; background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%); box-shadow: 0 8px 32px rgba(180,180,200,0.10); text-align: center;">
-            <h2 style="font-size: 2.2rem; font-family: 'Inter', 'Segoe UI', sans-serif; color: #0b2f23; margin-bottom: 0.5rem;">Welcome to DeFacture!</h2>
-            <p style="font-size: 1.3rem; color: #1e293b; font-weight: 500; margin-bottom: 1.2rem;">Your streamlined tool for news analysis and fact-checking.</p>
-            <span style="display: inline-block; background: linear-gradient(90deg, #e3f0fc 0%, #f8fafc 100%); color: #2563eb; padding: 0.7rem 2rem; border-radius: 16px; font-size: 1.1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(180,180,200,0.10);">Get started by selecting an article below!</span>
+        <div style="margin: 0.5rem 0; padding: 0.5rem 1rem; border-radius: 8px; background: linear-gradient(120deg, #e3f0fc 0%, #f8fafc 100%); box-shadow: 0 1px 4px rgba(180,180,200,0.04); text-align: center;">
+            <h2 style="font-size: 1.25rem; font-family: 'Inter', 'Segoe UI', sans-serif; color: #234e52; margin-bottom: 0.2rem; line-height: 1.2;">Welcome to DeFacture!</h2>
+            <p style="font-size: 0.85rem; color: #1e293b; font-weight: 500; margin-bottom: 0.25rem; line-height: 1.3;">Your streamlined tool for news analysis and fact-checking.</p>
+            <a href="#article-input" style="display: inline-block; background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-decoration: none; box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);">Get started by selecting an article below!</a>
         </div>
         """,
         unsafe_allow_html=True
@@ -75,8 +83,8 @@ def main():
     # 3. Article Input Section
     article_data = render_article_input()
     
-    # 4. Analysis Section (only shown when an article is selected)
-    if article_data:
+    # 4. Analysis Section (only shown when in analysis mode)
+    if article_data and st.session_state.get('analysis_mode', False):
         # Run analysis (would connect to actual analysis in a real app)
         with st.spinner("Analyzing article..."):
             # Here we're just passing the article data to the tabs component

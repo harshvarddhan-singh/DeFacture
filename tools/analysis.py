@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Mock data for demonstration purposes
-def mock_summarization_chain(text: str) -> Dict:
+def mock_summarization_chain(text: str, article_data: Optional[Dict] = None) -> Dict:
     """
     Mock function for article summarization
     
@@ -35,6 +35,8 @@ def mock_summarization_chain(text: str) -> Dict:
     -----------
     text : str
         The article text to summarize
+    article_data : dict, optional
+        Full article data including potential pre-computed mock analysis
         
     Returns:
     --------
@@ -42,6 +44,21 @@ def mock_summarization_chain(text: str) -> Dict:
         A dictionary containing the summary and key points
     """
     logger.info("Mock summarization called")
+    logger.info(f"Article data keys: {article_data.keys() if article_data else 'No article data'}")
+    
+    # Check if article has pre-computed mock analysis
+    if article_data and "mock_analysis" in article_data:
+        logger.info("Found mock_analysis in article_data")
+        if "summary" in article_data["mock_analysis"]:
+            logger.info("Found summary in mock_analysis")
+            logger.info(f"Summary: {article_data['mock_analysis']['summary']}")
+            return article_data["mock_analysis"]["summary"]
+        else:
+            logger.info("No summary found in mock_analysis")
+    else:
+        logger.info("No mock_analysis found in article_data")
+    
+    # Default mock response
     return {
         "summary": "This is a mock summary of the article. In a real implementation, this would use LangChain to generate a concise summary.",
         "key_points": [
@@ -51,7 +68,7 @@ def mock_summarization_chain(text: str) -> Dict:
         ]
     }
 
-def mock_context_analysis_chain(text: str) -> Dict:
+def mock_context_analysis_chain(text: str, article_data: Optional[Dict] = None) -> Dict:
     """
     Mock function for context analysis
     
@@ -59,6 +76,8 @@ def mock_context_analysis_chain(text: str) -> Dict:
     -----------
     text : str
         The article text to analyze
+    article_data : dict, optional
+        Full article data including potential pre-computed mock analysis
         
     Returns:
     --------
@@ -66,6 +85,13 @@ def mock_context_analysis_chain(text: str) -> Dict:
         A dictionary containing the context analysis
     """
     logger.info("Mock context analysis called")
+    
+    # Check if article has pre-computed mock analysis
+    if article_data and "mock_analysis" in article_data and "context" in article_data["mock_analysis"]:
+        logger.info("Using pre-computed mock context analysis data")
+        return article_data["mock_analysis"]["context"]
+    
+    # Default mock response
     return {
         "perspective": "The article appears to present a balanced view of the topic.",
         "bias_indicators": ["Minor use of loaded language", "Generally presents multiple perspectives"],
@@ -73,7 +99,7 @@ def mock_context_analysis_chain(text: str) -> Dict:
         "missing_context": "The article doesn't mention some relevant background information about regulatory changes."
     }
 
-def mock_related_articles_chain(text: str) -> List[Dict]:
+def mock_related_articles_chain(text: str, article_data: Optional[Dict] = None) -> List[Dict]:
     """
     Mock function for finding related articles
     
@@ -81,6 +107,8 @@ def mock_related_articles_chain(text: str) -> List[Dict]:
     -----------
     text : str
         The article text to find related articles for
+    article_data : dict, optional
+        Full article data including potential pre-computed mock analysis
         
     Returns:
     --------
@@ -88,6 +116,13 @@ def mock_related_articles_chain(text: str) -> List[Dict]:
         A list of related article information
     """
     logger.info("Mock related articles search called")
+    
+    # Check if article has pre-computed mock analysis
+    if article_data and "mock_analysis" in article_data and "related_articles" in article_data["mock_analysis"]:
+        logger.info("Using pre-computed mock related articles data")
+        return article_data["mock_analysis"]["related_articles"]
+    
+    # Default mock response
     return [
         {
             "title": "Related Article 1",
@@ -107,7 +142,7 @@ def mock_related_articles_chain(text: str) -> List[Dict]:
         }
     ]
 
-def mock_fact_check_chain(text: str) -> Dict:
+def mock_fact_check_chain(text: str, article_data: Optional[Dict] = None) -> Dict:
     """
     Mock function for fact checking
     
@@ -115,6 +150,8 @@ def mock_fact_check_chain(text: str) -> Dict:
     -----------
     text : str
         The article text to fact check
+    article_data : dict, optional
+        Full article data including potential pre-computed mock analysis
         
     Returns:
     --------
@@ -122,6 +159,13 @@ def mock_fact_check_chain(text: str) -> Dict:
         A dictionary containing the fact check results
     """
     logger.info("Mock fact checking called")
+    
+    # Check if article has pre-computed mock analysis
+    if article_data and "mock_analysis" in article_data and "fact_check" in article_data["mock_analysis"]:
+        logger.info("Using pre-computed mock fact check data")
+        return article_data["mock_analysis"]["fact_check"]
+    
+    # Default mock response
     return {
         "overall_assessment": "Mostly Accurate",
         "claims": [

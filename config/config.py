@@ -8,6 +8,14 @@ This module contains configuration settings for the application.
 import os
 from pathlib import Path
 
+# Try to load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not installed, continue with system environment variables
+    pass
+
 # Paths and directories
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -21,6 +29,9 @@ USE_LANGCHAIN_API = True
 # API keys and credentials (in a real app, these would be loaded from environment variables)
 API_KEYS = {
     "langchain": os.environ.get("LANGCHAIN_API_KEY", ""),
+    "serp_api": os.environ.get("SERP_API_KEY", ""),
+    "google_search_api": os.environ.get("GOOGLE_SEARCH_API_KEY", ""),
+    "google_search_engine_id": os.environ.get("GOOGLE_SEARCH_ENGINE_ID", ""),
 }
 
 # Model configuration

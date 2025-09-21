@@ -5,24 +5,60 @@
       "title": "Understanding Climate Change: New Research Shows Accelerating Impact",
       "source": "Science Daily",
       "url": "https://example.com/climate-change-article",
+      "domain": "Science Daily",
       "date_published": "2025-09-01",
-      "content": "Climate researchers have published new findings suggesting that the rate of global warming is accelerating beyond previous predictions. The study, published in Nature Climate Science, indicates that average global temperatures could rise by up to 3°C by 2050 if current emission trends continue. 'This is significantly faster than what we projected just five years ago,' said Dr. Emily Chen, lead researcher on the project. The research team analyzed data from over 1,000 weather stations worldwide, combined with satellite measurements and ocean temperature readings. They found that feedback loops in Arctic regions are creating a compounding effect that wasn't fully accounted for in earlier models. The findings have significant implications for climate policy, suggesting that more aggressive carbon reduction targets may be necessary to prevent the most severe consequences of climate change."
+      "author": "Dr. Sarah Johnson, Climate Scientist",
+      "content": "Climate researchers have published new findings suggesting that the rate of global warming is accelerating beyond previous predictions. The study, published in Nature Climate Science, indicates that average global temperatures could rise by up to 3°C by 2050 if current emission trends continue. 'This is significantly faster than what we projected just five years ago,' said Dr. Emily Chen, lead researcher on the project. The research team analyzed data from over 1,000 weather stations worldwide, combined with satellite measurements and ocean temperature readings. They found that feedback loops in Arctic regions are creating a compounding effect that wasn't fully accounted for in earlier models. The findings have significant implications for climate policy, suggesting that more aggressive carbon reduction targets may be necessary to prevent the most severe consequences of climate change.",
+      "mock_analysis": {
+        "summary": {
+          "summary": "Recent climate research indicates that global warming is accelerating faster than previous predictions, with temperatures potentially rising up to 3°C by 2050 if emissions continue at current rates. Dr. Emily Chen's team analyzed data from 1,000+ weather stations, satellites, and ocean temperature readings, discovering that Arctic feedback loops are creating compounding effects not accounted for in earlier models. These findings suggest the need for more aggressive carbon reduction policies to avoid the most severe climate change impacts.",
+          "key_points": [
+            "Global warming is accelerating beyond previous predictions, with potential temperature increases of 3°C by 2050",
+            "Arctic feedback loops are creating compounding effects that weren't accounted for in earlier climate models",
+            "More aggressive carbon reduction targets may be necessary based on this new research"
+          ]
+        }
+      }
     },
     {
       "id": 2,
       "title": "Global Tech Summit Showcases New AI Developments",
       "source": "Tech Insider",
       "url": "https://example.com/tech-summit-ai",
+      "domain": "Tech Insider",
       "date_published": "2025-09-05",
-      "content": "The annual Global Technology Summit concluded yesterday in Singapore, with artificial intelligence taking center stage. Over 500 companies presented their latest innovations, with particular attention on ethical AI development and regulation. 'We're seeing a fundamental shift in how AI systems are being designed,' explained Sophia Park, CEO of NeuralTech Industries. 'There's much more focus on transparency and explainability.' Among the most talked-about presentations was a demonstration of a new large language model that can explain its reasoning process step-by-step, addressing one of the key criticisms of current AI systems. Government representatives from 45 countries also attended the summit, with many discussing proposed regulatory frameworks for AI development. The European Union announced plans for standardized AI testing requirements that would apply to systems used in critical infrastructure and healthcare. Industry leaders expressed mixed reactions, with some welcoming clear guidelines while others voiced concerns about potential limitations on innovation."
+      "author": "Michael Rodriguez, Tech Reporter",
+      "content": "The annual Global Technology Summit concluded yesterday in Singapore, with artificial intelligence taking center stage. Over 500 companies presented their latest innovations, with particular attention on ethical AI development and regulation. 'We're seeing a fundamental shift in how AI systems are being designed,' explained Sophia Park, CEO of NeuralTech Industries. 'There's much more focus on transparency and explainability.' Among the most talked-about presentations was a demonstration of a new large language model that can explain its reasoning process step-by-step, addressing one of the key criticisms of current AI systems. Government representatives from 45 countries also attended the summit, with many discussing proposed regulatory frameworks for AI development. The European Union announced plans for standardized AI testing requirements that would apply to systems used in critical infrastructure and healthcare. Industry leaders expressed mixed reactions, with some welcoming clear guidelines while others voiced concerns about potential limitations on innovation.",
+      "mock_analysis": {
+        "summary": {
+          "summary": "The Global Technology Summit in Singapore highlighted significant advances in AI development, with a strong emphasis on ethics and regulation. Sophia Park of NeuralTech Industries noted a fundamental shift toward transparency in AI design. A standout presentation featured a large language model capable of explaining its reasoning process, addressing a major criticism of current AI systems. Government representatives from 45 countries discussed regulatory frameworks, with the EU announcing plans for standardized AI testing requirements for critical sectors. Industry reactions were mixed, balancing the benefits of clear guidelines against concerns about innovation constraints.",
+          "key_points": [
+            "The tech industry is shifting toward more transparent and explainable AI systems",
+            "A new large language model demonstrated the ability to explain its reasoning process step-by-step",
+            "The EU is planning standardized AI testing requirements for critical sectors, receiving mixed industry reactions"
+          ]
+        }
+      }
     },
     {
       "id": 3,
       "title": "Medical Breakthrough: New Treatment Shows Promise for Alzheimer's Disease",
       "source": "Health Reporter",
       "url": "https://example.com/alzheimers-treatment",
+      "domain": "Health Reporter",
       "date_published": "2025-08-28",
-      "content": "A clinical trial for a new Alzheimer's treatment has shown promising results, according to research published today in the Journal of Neurological Medicine. The treatment, which combines immunotherapy with targeted neural stimulation, showed a 47% reduction in cognitive decline compared to current standard treatments. 'These results represent the most significant advancement in Alzheimer's treatment we've seen in decades,' said Dr. Robert Johnson, who led the research team at Central Medical University. The trial involved 1,200 patients across 15 research hospitals, making it one of the largest Alzheimer's studies ever conducted. Patients receiving the new treatment showed improvements in memory function and daily living activities, with effects becoming apparent after just three months of treatment. The pharmaceutical company behind the treatment, BioNeuron Therapeutics, has already filed for regulatory approval in multiple countries. If approved, the treatment could be available to patients within two years. However, some experts urge caution, noting that longer-term studies are still needed to assess the treatment's safety profile and whether benefits persist over time."
+      "author": "Dr. Jennifer Lee, Medical Correspondent",
+      "content": "A clinical trial for a new Alzheimer's treatment has shown promising results, according to research published today in the Journal of Neurological Medicine. The treatment, which combines immunotherapy with targeted neural stimulation, showed a 47% reduction in cognitive decline compared to current standard treatments. 'These results represent the most significant advancement in Alzheimer's treatment we've seen in decades,' said Dr. Robert Johnson, who led the research team at Central Medical University. The trial involved 1,200 patients across 15 research hospitals, making it one of the largest Alzheimer's studies ever conducted. Patients receiving the new treatment showed improvements in memory function and daily living activities, with effects becoming apparent after just three months of treatment. The pharmaceutical company behind the treatment, BioNeuron Therapeutics, has already filed for regulatory approval in multiple countries. If approved, the treatment could be available to patients within two years. However, some experts urge caution, noting that longer-term studies are still needed to assess the treatment's safety profile and whether benefits persist over time.",
+      "mock_analysis": {
+        "summary": {
+          "summary": "A groundbreaking Alzheimer's treatment combining immunotherapy and targeted neural stimulation has demonstrated remarkable results in a large clinical trial. The research, published in the Journal of Neurological Medicine, showed a 47% reduction in cognitive decline compared to standard treatments. Led by Dr. Robert Johnson at Central Medical University, the study involved 1,200 patients across 15 research hospitals, with improvements in memory and daily living activities appearing after just three months. BioNeuron Therapeutics has filed for regulatory approval, potentially making the treatment available within two years. However, experts caution that longer-term studies are needed to fully assess safety and the persistence of benefits.",
+          "key_points": [
+            "The novel treatment combines immunotherapy with targeted neural stimulation, reducing cognitive decline by 47%",
+            "Improvements in memory and daily activities were observed after just three months of treatment",
+            "While promising, longer-term studies are still needed to confirm safety and lasting effectiveness"
+          ]
+        }
+      }
     }
   ]
 }

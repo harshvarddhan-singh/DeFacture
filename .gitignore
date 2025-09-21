@@ -6,6 +6,12 @@ env/
 env.bak/
 venv.bak/
 
+# Environment variables (contains API keys)
+.env
+.env.local
+.env.production
+*.env
+
 # Python cache
 __pycache__/
 *.pyc

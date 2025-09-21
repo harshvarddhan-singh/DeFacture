@@ -335,7 +335,81 @@ def render_analysis_tabs(article_data=None):
 
     # Related Articles tab
     with tab_related:
-        related_articles = mock_related_articles_chain(article_data.get("content", ""), article_data)
+        # Try to import the related articles module
+        try:
+            from tools.related_articles import find_related_articles, load_sample_articles
+            
+            # Configuration options
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col1:
+                similarity_method = st.selectbox(
+                    "Similarity Method",
+                    ["semantic", "keyword"],
+                    index=0,
+                    help="Choose how to find related articles: semantic uses meaning, keyword uses exact terms"
+                )
+            with col2:
+                max_results = st.number_input("Max Results", min_value=1, max_value=5, value=3)
+            with col3:
+                show_explanations = st.checkbox("Show Explanations", value=False)
+            
+            # Get candidate articles based on article source
+            candidate_articles = []
+            
+            # For sample articles, use other sample articles
+            if article_data.get("source") == "sample":
+                with st.spinner("Finding related articles..."):
+                    candidate_articles = load_sample_articles()
+                    
+            # For URL or search results, use any articles in session state
+            elif article_data.get("source") in ["url", "search_result"]:
+                # Get search results from session state if available
+                if "search_results" in st.session_state and st.session_state["search_results"]:
+                    candidate_articles = st.session_state["search_results"]
+                # For URL articles with no search results, trigger a SERP API search
+                elif article_data.get("source") == "url" and article_data.get("content"):
+                    try:
+                        from tools.search_api import search_articles_serp
+                        from tools.keyword_extraction import generate_search_query
+                        
+                        with st.spinner("Extracting keywords from article..."):
+                            # Generate search query using keyword extraction
+                            search_query = generate_search_query(article_data)
+                            
+                            st.info(f"Search query for related articles: '{search_query}'")
+                        
+                        with st.spinner("Searching for related articles..."):
+                            # Search for related articles using the query
+                            search_results = search_articles_serp(search_query, num_results=10)
+                            
+                            # Store results in session state for future use
+                            if search_results:
+                                st.session_state["search_results"] = search_results
+                                candidate_articles = search_results
+                                st.success(f"Found {len(search_results)} related articles")
+                            else:
+                                candidate_articles = load_sample_articles()
+                    except Exception as e:
+                        st.warning(f"Could not perform search for related articles: {str(e)}")
+                        candidate_articles = load_sample_articles()
+                # Fallback to sample articles if no search results
+                else:
+                    candidate_articles = load_sample_articles()
+            
+            # Find related articles
+            with st.spinner("Finding semantically related articles..."):
+                related_articles = find_related_articles(
+                    article_data=article_data,
+                    candidate_articles=candidate_articles,
+                    max_results=max_results,
+                    use_explanations=show_explanations
+                )
+        except ImportError as e:
+            st.warning(f"Could not import related articles module: {str(e)}")
+            related_articles = mock_related_articles_chain(article_data.get("content", ""), article_data)
+        except Exception as e:
+            st.error(f"Error finding related articles: {str(e)}")
+            related_articles = mock_related_articles_chain(article_data.get("content", ""), article_data)
         
         # Render related articles in beautiful card
         st.markdown(
@@ -388,6 +462,25 @@ def render_analysis_tabs(article_data=None):
                 escaped_source = html.escape(article.get('source', 'Unknown Source'))
                 escaped_url = html.escape(article.get('url', '#'))
                 
+                # Get explanation if available
+                explanation = article.get('explanation', '')
+                escaped_explanation = html.escape(explanation) if explanation else ''
+                
+                # Format similarity score as percentage
+                similarity_score = article.get('similarity_score', 0.0)
+                similarity_percentage = f"{int(similarity_score * 100)}%"
+                
+                # Card HTML with optional explanation
+                explanation_html = ""
+                if show_explanations and escaped_explanation:
+                    explanation_html = f"""
+                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(203, 213, 225, 0.2); border-radius: 8px; border-left: 3px solid #6366f1;">
+                        <p style="margin: 0; font-size: 0.85rem; color: #4b5563; font-style: italic;">
+                            <span style="font-weight: 500; color: #4338ca;">Why it's related:</span> {escaped_explanation}
+                        </p>
+                    </div>
+                    """
+                
                 st.markdown(
                     f"""
                     <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); transition: all 0.2s ease;">
@@ -407,17 +500,24 @@ def render_analysis_tabs(article_data=None):
                                 <span style="font-size: 0.8rem;">📅</span>
                                 <span style="color: #6b7280; font-size: 0.8rem;">{article.get('date', 'Unknown Date')}</span>
                             </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span style="font-size: 0.8rem;">🔍</span>
+                                <span style="color: #6b7280; font-size: 0.8rem;">Similarity: {similarity_percentage}</span>
+                            </div>
                         </div>
                         
-                        <div style="display: flex; gap: 0.75rem;">
+                        <div style="display: flex; gap: 0.75rem; margin-bottom: {explanation_html and '0.75rem' or '0'};">
                             <span style="background: {relevance_bg}; color: {relevance_color}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
                                 {article.get('relevance', 'Medium')} Relevance
                             </span>
                             
-                            <span style="background: rgba({perspective_color[1:]}, 0.1); color: {perspective_color}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
-                                {perspective_icon} {article.get('perspective', 'Similar')}
+                            <span style="background: rgba(16, 185, 129, 0.1); color: {perspective_color}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                <span style="display: inline-block; margin-right: 0.25rem;">{perspective_icon}</span> {article.get('perspective', 'Similar')}
                             </span>
                         </div>
+                        
+                        {explanation_html}
                     </div>
                     """,
                     unsafe_allow_html=True

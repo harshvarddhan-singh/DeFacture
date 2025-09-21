@@ -1,0 +1,31 @@
+Enhance related articles with advanced keyword extraction and UI improvements
+
+This commit enhances the related articles functionality with:
+
+1. Advanced keyword extraction for URL-sourced articles
+   - Added hybrid extraction approach combining multiple methods (frequency, NLTK, TF-IDF, named entities)
+   - Implemented more sophisticated search query generation
+   - Added graceful handling of NLTK resource errors
+   - Fixed specific issues with named entity recognition
+   - Weighted title keywords more heavily in search queries
+
+2. Enhanced UI for related articles display
+   - Improved layout and styling for article cards
+   - Added clearer visual indicators for relevance and perspective
+   - Fixed HTML rendering issues with nested flex elements
+   - Used inline-block for icons to ensure proper rendering in Streamlit
+
+3. Better search query generation
+   - Combines title with extracted keywords
+   - Limits query length for optimal search results
+   - Removes duplicate terms for more efficient queries
+   - Prioritizes named entities in search queries
+
+4. Error handling and user experience improvements
+   - Graceful fallbacks when libraries are missing
+   - Better feedback when search is performed
+   - Added descriptive messages for search results
+
+These changes significantly improve the relevance of related articles
+when analyzing URL-sourced content by generating better search
+queries from extracted keywords.

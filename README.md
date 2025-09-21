@@ -9,7 +9,7 @@ DeFacture is a prototype application built with Streamlit that provides a user-f
 - Select from sample news articles or enter custom URLs
 - View article summaries with key points
 - See contextual background information
-- Discover related articles
+- Discover semantically related articles with similarity scores
 - Review fact-checking results
 
 ## Data Sources and Analysis Modes
@@ -21,6 +21,10 @@ The application intelligently handles both sample data and external APIs:
 3. **LangChain Analysis** - Choose between:
    - Mock LLM analysis (simulated responses)
    - Real LLM API calls (for custom URLs only, requires API key)
+4. **Related Articles** - Find semantically similar content using:
+   - Embedding-based semantic similarity (using sentence-transformers)
+   - Keyword-based Jaccard similarity (as a fallback)
+   - Optional explanations of article relationships
 
 The application automatically chooses the appropriate data source based on user selection.
 
@@ -36,6 +40,26 @@ When enabled, the system will:
 - Use real LLM API calls for custom URL analysis
 - Fall back to mock data for sample articles
 - Display errors if API keys are missing or invalid
+
+### Related Articles Feature
+
+The related articles feature uses semantic embeddings to find similar articles:
+
+1. **Setup the environment**:
+   ```bash
+   python setup_related_articles.py --all
+   ```
+
+2. **Features**:
+   - Semantic similarity using sentence transformers
+   - Automatically compares with other articles in the dataset
+   - Displays similarity scores and article perspectives
+   - Optional explanations of why articles are related
+
+3. **Configuration options** in the UI:
+   - Choose similarity method (semantic or keyword)
+   - Set maximum number of results
+   - Toggle explanation feature on/off
 
 ## Setup Instructions
 

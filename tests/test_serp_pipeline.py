@@ -7,7 +7,7 @@ newspaper3k extraction to all downstream analysis modules.
 
 import sys
 import os
-sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from tools.search_api import search_articles_serp, mock_search_results
 from tools.fetcher import fetch_article_with_newspaper

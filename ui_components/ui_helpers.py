@@ -296,22 +296,24 @@ def show_method_description(method: str):
 def create_url_input_form():
     """Create URL input form with validation and persistent state"""
     st.markdown("### 🌐 Enter Article URL")
-    url_input = st.text_input(
-        "Article URL:",
-        placeholder="https://example.com/article",
-        help="Enter the URL of the article you want to fact-check",
-        key="url_input_field"  # Add key to maintain state across reruns
-    )
+    
+    # Use a form to properly handle Enter key press
+    with st.form(key="url_input_form"):
+        url_input = st.text_input(
+            "Article URL:",
+            placeholder="https://example.com/article",
+            help="Enter the URL of the article you want to fact-check",
+            key="url_input_field"  # Add key to maintain state across reruns
+        )
 
-    # Make fetch button more prominent
-    st.markdown("**Step 1: Fetch Article Content**")
-    fetch_button = st.button(
-        "🌐 Fetch from URL",
-        type="primary",
-        use_container_width=True,
-        help="Click to fetch and preview the article content",
-        key="fetch_url_button"  # Unique key for URL handler
-    )
+        # Make fetch button more prominent
+        st.markdown("**Step 1: Fetch Article Content**")
+        fetch_button = st.form_submit_button(
+            "🌐 Fetch from URL",
+            type="primary",
+            use_container_width=True,
+            help="Click to fetch and preview the article content"
+        )
 
     return url_input, fetch_button
 

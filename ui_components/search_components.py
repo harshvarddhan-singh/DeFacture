@@ -32,21 +32,18 @@ def create_search_interface():
     # Create a simplified status dict for compatibility
     api_status = {'status': status}
     
-    # Search input form
-    search_query = st.text_input(
-        "Enter your search query:",
-        placeholder="e.g., climate change latest research",
-        help="Enter keywords to search for relevant articles"
-    )
-    
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        search_button = st.button(
+    # Search input using form to properly handle Enter key
+    with st.form(key="search_form"):
+        search_query = st.text_input(
+            "Enter your search query:",
+            placeholder="e.g., climate change latest research",
+            help="Enter keywords to search for relevant articles"
+        )
+        
+        search_button = st.form_submit_button(
             "Search Articles",
             type="primary",
-            use_container_width=True,
-            disabled=not validate_search_query(search_query),
-            key="search_articles_button"  # Add key to avoid button state conflicts
+            use_container_width=True
         )
     
     return search_query, search_button, api_status
@@ -135,7 +132,7 @@ def show_article_preview(article_result: dict):
                 <strong>Summary:</strong> {article_result['snippet']}
             </p>
             <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(16, 185, 129, 0.2);">
-                <a href="{article_result['link']}" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">
+                <a href="{article_result.get('link', article_result.get('url', '#'))}" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">
                     🔗 View Original Article
                 </a>
             </div>
@@ -146,6 +143,11 @@ def show_article_preview(article_result: dict):
 
 def handle_search_process(search_query: str, api_status: dict):
     """Handle the search process and return results"""
+    # First validate the search query
+    if not validate_search_query(search_query):
+        st.error("⚠️ Please enter a search query with at least 3 characters")
+        return []
+        
     if api_status['status'] != 'configured':
         # Show mock results with warning
         st.warning("🔧 Using mock search results due to API configuration issue")
@@ -165,12 +167,19 @@ def handle_search_process(search_query: str, api_status: dict):
         with st.spinner("🔍 Searching for articles..."):
             try:
                 results = search_articles_serp(search_query)
-                if results.get('status') == 'success':
+                # Check if results is a list (direct search results)
+                if isinstance(results, list):
+                    search_results = results
+                    st.success(f"✅ Found {len(search_results)} articles")
+                    return search_results
+                # Check if results is a dict (error or status response)
+                elif isinstance(results, dict) and results.get('status') == 'success':
                     search_results = results.get('articles', [])
                     st.success(f"✅ Found {len(search_results)} articles")
                     return search_results
                 else:
-                    st.error(f"❌ Search failed: {results.get('message', 'Unknown error')}")
+                    error_msg = results.get('message', 'Unknown error') if isinstance(results, dict) else "Unexpected response format"
+                    st.error(f"❌ Search failed: {error_msg}")
                     return []
             except Exception as e:
                 st.error(f"❌ Search error: {str(e)}")

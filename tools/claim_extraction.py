@@ -46,8 +46,12 @@ def _ensure_nltk_data():
             else:
                 ssl._create_default_https_context = _create_unverified_https_context
             
+            # Download all necessary NLTK data
             nltk.download('punkt', quiet=True)
-            nltk.download('averaged_perceptron_tagger', quiet=True)
+            nltk.download('averaged_perceptron_tagger', quiet=True)  # This is for English
+            nltk.download('maxent_ne_chunker', quiet=True)
+            nltk.download('words', quiet=True)
+            nltk.download('stopwords', quiet=True)
             logger.info("NLTK data downloaded successfully")
             return True
             

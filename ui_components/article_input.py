@@ -178,7 +178,8 @@ def handle_search_workflow():
     search_query, search_button, api_status = create_search_interface()
     
     # Perform search if button clicked
-    if search_button and search_query.strip():
+    if search_button:
+        # We already have validation in handle_search_process
         search_results = handle_search_process(search_query, api_status)
         if search_results:
             st.session_state.search_results = search_results
@@ -193,12 +194,19 @@ def handle_search_workflow():
             # Fetch article content from selected search result
             with st.spinner("📰 Fetching article content..."):
                 try:
-                    result = fetch_article_with_newspaper(selected_result['link'])
+                    # Get the URL from either 'link' or 'url' field
+                    article_url = selected_result.get('link', selected_result.get('url', None))
+                    
+                    if not article_url:
+                        st.error("❌ Error: No URL found in search result")
+                        return None
+                    
+                    result = fetch_article_with_newspaper(article_url)
                     if result and result.get('success', False):
                         article_data = {
                             'title': result['title'] or selected_result['title'],
                             'content': result['content'],
-                            'url': selected_result['link'],
+                            'url': article_url,
                             'source': 'search_result',
                             'original_source': selected_result['source'],
                             'domain': result.get('domain') or selected_result.get('domain', 'Unknown'),

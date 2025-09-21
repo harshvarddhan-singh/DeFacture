@@ -11,10 +11,14 @@ from pathlib import Path
 # Try to load environment variables from .env file
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    print("Loaded .env file successfully")
 except ImportError:
     # dotenv not installed, continue with system environment variables
+    print("python-dotenv not installed, continuing with system environment variables")
     pass
+except Exception as e:
+    print(f"Error loading .env file: {e}")
 
 # Paths and directories
 BASE_DIR = Path(__file__).parent.parent

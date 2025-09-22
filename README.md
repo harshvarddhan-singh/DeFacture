@@ -166,9 +166,7 @@ Run tests with:
 python -m pytest tests/
 ```
 
-## License
 
-[MIT License](LICENSE)
 
 ## Contributors
 

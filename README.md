@@ -172,5 +172,4 @@ python -m pytest tests/
 
 ## Contributors
 
-- Harsh Vardhan Singh
-- [Other contributors]
+- Harshvarddhan Singh
